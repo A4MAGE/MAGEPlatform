@@ -75,9 +75,14 @@ export const AuthContextProvider = ({
       setSession(session);
     });
 
-    supabase.auth.onAuthStateChange((_event, session) => {
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
     });
+
+    // When app exits, this unloads the Supabase auth callback from memory
+    return () => subscription.unsubscribe();
   }, []);
 
   return (
