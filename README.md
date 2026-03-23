@@ -8,5 +8,6 @@ At this stage, this repository will be updated with each team members work, and 
 - In this folder, you will find AuthContext.tsx, which is a React context provider which can be applied to our react application in order to handle user authentication.
 
 
-## Note: For more details on the audio feature, see the [audio/README.md](audio/README.md)
+## Note:
+For more details on the audio feature, see the [audio/README.md](audio/README.md)
 
