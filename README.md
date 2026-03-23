@@ -13,7 +13,7 @@ Update: I'll be working on this project locally instead of on the CS server beca
 | Tech Stack | Done | React, Node.js, Supabase |
 | Supabase Instance | Done | All members have access |
 | Database Schema | Done | [Link](https://docs.google.com/document/d/1WCCdBn7vFXD7Z-eKLipdq_6cHK0YmeBYFvO8EenZoIQ/edit?usp=sharing) |
-| Preset Storage Schema | Done | Supabase schema for user presets (Amanda) |
-| Audio Playback Controls | In Progress | AudioEngine + UI done (Yazeed), AudioController pending (Gladys) |
-| Authentication | In Review | JasonCourtois |
-| Demo Homepage | In Review | RoniDomi |
+| Preset Storage Schema | Done | Supabase schema for user presets |
+| Audio Playback Controls | In Progress | AudioEngine + UI done, AudioController pending |
+| Authentication | In Review | |
+| Demo Homepage | In Review | |
