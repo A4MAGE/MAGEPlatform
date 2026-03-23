@@ -1,0 +1,40 @@
+:root {
+  --bgcol: rgba(25, 25, 26, 1);
+  --grdcol1: rgba(118, 219, 202, 1); /* Cyan */
+  --grdcol2: rgba(235, 235, 47, 1); /* Yellow */
+  --grdcol3: rgba(232, 97, 183, 1); /* Magenta */
+}
+
+body {
+  min-height: 100vh;
+  background: var(--bgcol);
+  overflow: hidden;
+  position: relative;
+}
+
+body::before {
+  content: '';
+  position: absolute;
+  width: 300%;
+  height: 300%;
+  top: -100%;
+  left: -100%;
+  z-index: -1;
+  background: radial-gradient(circle at center, var(--grdcol2) 0%, transparent 70%);
+  animation: orbit 6s ease-in-out infinite, colorshift 6s linear infinite;
+  transform-origin: center center;
+  opacity: 0.2;
+}
+
+@keyframes colorshift {
+  0%   { filter: hue-rotate(0deg); }
+  100% { filter: hue-rotate(360deg); }
+}
+
+@keyframes orbit {
+  0%   { transform: translate(0%, 0%);        background: radial-gradient(circle at center, var(--grdcol2) 0%, transparent 70%);}
+  25%  { transform: translate(20%, -15%);     background: radial-gradient(circle at center, var(--grdcol1) 0%, transparent 70%);}
+  50%  { transform: translate(0%, -25%);      background: radial-gradient(circle at center, var(--grdcol3) 0%, transparent 70%);}
+  75%  { transform: translate(-20%, -15%);    background: radial-gradient(circle at center, var(--grdcol2) 0%, transparent 70%);}
+  100% { transform: translate(0%, 0%);        background: radial-gradient(circle at center, var(--grdcol1) 0%, transparent 70%);}
+}
