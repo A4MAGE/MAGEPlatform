@@ -19,7 +19,7 @@ function Carousel() {
   const getSlideStyle = (index) => {
     const distance = Math.abs(index - selectedIndex);
     const scale = Math.max(0.7, 1 - distance * 0.1);
-    const opacity = Math.max(0.3, 1 - distance * 0.25);
+    const opacity = Math.max(0.3, 1 - distance * 0.4);
     const blur = distance * 2;
     return {
       transform: `scale(${scale})`,
