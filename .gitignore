@@ -4,5 +4,8 @@ slide.pdf
 BrandonSiscoe_MAGE-Platform_cs410-01.pdf
 preset-pack.zip
 
+# Playwright MCP screenshots and logs
+.playwright-mcp/
+
 # macOS
 .DS_Store
