@@ -1,11 +1,11 @@
 import data from '../mock-data/json'
-const Fuse = require('fuse.js');
+import Fuse from 'fuse.js';
 
 const fuseOptions = {
 	
 	keys: [
-		"title",
-		"author.firstName",
+		"author",
+		"name",
 		"tag",
 		"audio source".
 	
@@ -15,6 +15,6 @@ const fuseOptions = {
 const fuse = new Fuse(list, fuseOptions);
 
 // Change the pattern
-const searchPattern = ""
+//const searchPattern = ""
 
-return fuse.search(searchPattern)
+//return fuse.search(searchPattern)
