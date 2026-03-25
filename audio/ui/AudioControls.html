@@ -1,5 +1,5 @@
 <!-- AudioControls.html - Yazeed & Gladys -->
-<!-- Full-page immersive audio player with 3D reactive sphere -->
+<!-- Audio controls: play/pause, seek, waveform, spectrum, metadata -->
 
 <!DOCTYPE html>
 <html lang="en">
@@ -11,8 +11,6 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600&family=Space+Mono:ital,wght@0,400;0,700&display=swap" rel="stylesheet">
     <script src="vendor/wavesurfer.min.js"></script>
-    <script src="vendor/three.min.js"></script>
-    <script src="vendor/gsap.min.js"></script>
     <style>
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -49,30 +47,23 @@
             pointer-events: none;
         }
 
-        /* ─── Three.js canvas ─── */
-        #sphere-canvas {
-            position: fixed; top: 0; left: 0;
-            width: 100%; height: 68%;
-            z-index: 1; pointer-events: none;
-        }
-
-        /* ─── Spectrum (subtle, behind everything) ─── */
+        /* ─── Spectrum ─── */
         #spectrum-canvas {
             position: fixed;
-            bottom: 196px;
-            left: 50%; transform: translateX(-50%);
-            width: 58%; max-width: 580px; height: 56px;
-            z-index: 2; opacity: 0.3; pointer-events: none;
-            border-radius: 4px;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            width: 62%; max-width: 640px; height: 110px;
+            z-index: 2; pointer-events: none;
+            border-radius: 6px;
         }
 
         /* ─── WaveSurfer strip ─── */
         #waveform-wrap {
             position: fixed;
-            bottom: 156px;
+            bottom: 108px;
             left: 50%; transform: translateX(-50%);
-            width: 60%; max-width: 600px;
-            z-index: 3; opacity: 0.5;
+            width: 62%; max-width: 640px;
+            z-index: 3; opacity: 0.65;
         }
 
         /* ─── Decorative rings (CSS) ─── */
@@ -278,7 +269,7 @@
 
         /* ─── BOTTOM BAR ─── */
         #bottom-bar {
-            position: fixed; bottom: 20px;
+            position: fixed; bottom: 16px;
             left: 50%; transform: translateX(-50%);
             width: calc(100% - 300px);
             max-width: 920px; min-width: 400px;
@@ -385,9 +376,6 @@
 <div class="ring ring-2"></div>
 <div class="ring ring-3"></div>
 
-<!-- Three.js -->
-<canvas id="sphere-canvas"></canvas>
-
 <!-- Spectrum -->
 <canvas id="spectrum-canvas"></canvas>
 
@@ -488,193 +476,28 @@
 const engine     = new AudioEngine();
 const controller = new AudioController(engine);
 
-/* ══════════════════════════════════════════════════
-   THREE.JS — 3D REACTIVE SPHERE
-══════════════════════════════════════════════════ */
-const canvas3d = document.getElementById('sphere-canvas');
-const renderer = new THREE.WebGLRenderer({ canvas: canvas3d, antialias: true, alpha: true });
-renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-renderer.setClearColor(0x000000, 0);
-
-const scene  = new THREE.Scene();
-const camera = new THREE.PerspectiveCamera(38, 1, 0.1, 100);
-camera.position.z = 4.9;
-camera.position.y = -0.12; /* slight downward offset */
-
-function resizeSphere() {
-    const w = canvas3d.clientWidth, h = canvas3d.clientHeight;
-    renderer.setSize(w, h, false);
-    camera.aspect = w / h;
-    camera.updateProjectionMatrix();
-}
-resizeSphere();
-window.addEventListener('resize', resizeSphere);
-
-/* ── Vertex shader: simplex noise vertex deformation ── */
-const vertShader = `
-uniform float uTime;
-uniform float uBass;
-uniform float uMid;
-varying vec3 vNormal;
-varying float vDisplace;
-
-// --- Simplex 3D noise (Ashima / IQ) ---
-vec3 mod289v3(vec3 x){ return x - floor(x*(1.0/289.0))*289.0; }
-vec4 mod289v4(vec4 x){ return x - floor(x*(1.0/289.0))*289.0; }
-vec4 permute4(vec4 x){ return mod289v4(((x*34.0)+1.0)*x); }
-vec4 taylorInvSqrt4(vec4 r){ return 1.79284291400159 - 0.85373472095314*r; }
-
-float snoise(vec3 v){
-  const vec2 C = vec2(1.0/6.0, 1.0/3.0);
-  const vec4 D = vec4(0.0, 0.5, 1.0, 2.0);
-  vec3 i  = floor(v + dot(v, C.yyy));
-  vec3 x0 = v - i + dot(i, C.xxx);
-  vec3 g  = step(x0.yzx, x0.xyz);
-  vec3 l  = 1.0 - g;
-  vec3 i1 = min(g.xyz, l.zxy);
-  vec3 i2 = max(g.xyz, l.zxy);
-  vec3 x1 = x0 - i1 + C.xxx;
-  vec3 x2 = x0 - i2 + C.yyy;
-  vec3 x3 = x0 - D.yyy;
-  i = mod289v3(i);
-  vec4 p = permute4(permute4(permute4(
-      i.z + vec4(0.0, i1.z, i2.z, 1.0))
-    + i.y + vec4(0.0, i1.y, i2.y, 1.0))
-    + i.x + vec4(0.0, i1.x, i2.x, 1.0));
-  float n_ = 0.142857142857;
-  vec3 ns = n_ * D.wyz - D.xzx;
-  vec4 j  = p - 49.0 * floor(p * ns.z * ns.z);
-  vec4 x_ = floor(j * ns.z);
-  vec4 y_ = floor(j - 7.0*x_);
-  vec4 xs = x_*ns.x + ns.yyyy;
-  vec4 ys = y_*ns.x + ns.yyyy;
-  vec4 hs = 1.0 - abs(xs) - abs(ys);
-  vec4 b0 = vec4(xs.xy, ys.xy);
-  vec4 b1 = vec4(xs.zw, ys.zw);
-  vec4 s0 = floor(b0)*2.0 + 1.0;
-  vec4 s1 = floor(b1)*2.0 + 1.0;
-  vec4 sh = -step(hs, vec4(0.0));
-  vec4 a0 = b0.xzyw + s0.xzyw*sh.xxyy;
-  vec4 a1 = b1.xzyw + s1.xzyw*sh.zzww;
-  vec3 p0 = vec3(a0.xy, hs.x);
-  vec3 p1 = vec3(a0.zw, hs.y);
-  vec3 p2 = vec3(a1.xy, hs.z);
-  vec3 p3 = vec3(a1.zw, hs.w);
-  vec4 norm = taylorInvSqrt4(vec4(dot(p0,p0), dot(p1,p1), dot(p2,p2), dot(p3,p3)));
-  p0 *= norm.x; p1 *= norm.y; p2 *= norm.z; p3 *= norm.w;
-  vec4 m = max(0.6 - vec4(dot(x0,x0), dot(x1,x1), dot(x2,x2), dot(x3,x3)), 0.0);
-  m = m*m;
-  return 42.0 * dot(m*m, vec4(dot(p0,x0), dot(p1,x1), dot(p2,x2), dot(p3,x3)));
-}
-
-void main(){
-  vNormal = normal;
-  float n = snoise(normal * 2.2 + uTime * 0.28);
-  float d = n * (0.14 + uBass * 0.55);
-  vDisplace = d;
-  vec3 np = position + normal * d;
-  gl_Position = projectionMatrix * modelViewMatrix * vec4(np, 1.0);
-}
-`;
-
-/* ── Fragment shader: glow + colour gradient ── */
-const fragShader = `
-uniform float uMid;
-uniform float uBeat;
-varying vec3 vNormal;
-varying float vDisplace;
-
-void main(){
-  float rim   = pow(max(0.0, 0.75 - dot(vNormal, vec3(0.0, 0.0, 1.0))), 2.5);
-  float inner = pow(max(0.0, dot(vNormal, vec3(0.0, 0.0, 1.0))), 1.5) * 0.18;
-  vec3 deep   = vec3(0.03, 0.06, 0.35);
-  vec3 indigo = vec3(0.22, 0.18, 0.85);
-  vec3 cyan   = vec3(0.0,  0.82, 1.0);
-  vec3 white  = vec3(1.0,  1.0,  1.0);
-  float t     = clamp(uMid * 1.2 + vDisplace * 2.0, 0.0, 1.0);
-  vec3 col    = mix(deep, indigo, 0.4);
-  col         = mix(col, cyan, t);
-  col         = mix(col, white, uBeat * 0.5);
-  col        += cyan  * rim   * (0.65 + uMid * 0.9);
-  col        += white * inner * uBeat;
-  float alpha = clamp(rim * 1.1 + inner + 0.08 + uMid * 0.32, 0.0, 1.0);
-  gl_FragColor = vec4(col, alpha);
-}
-`;
-
-/* ── Build meshes ── */
-const innerGeo = new THREE.SphereGeometry(1.0, 80, 80);
-const innerMat = new THREE.ShaderMaterial({
-    vertexShader: vertShader,
-    fragmentShader: fragShader,
-    uniforms: {
-        uTime: { value: 0 },
-        uBass: { value: 0 },
-        uMid:  { value: 0 },
-        uBeat: { value: 0 },
-    },
-    transparent: true,
-    depthWrite: false,
-    side: THREE.FrontSide,
-});
-const innerSphere = new THREE.Mesh(innerGeo, innerMat);
-scene.add(innerSphere);
-
-/* outer wireframe removed — inner glow sphere is the hero */
-
-/* ambient point light halo */
-const pointLight = new THREE.PointLight(0x00c8ff, 1.2, 6);
-pointLight.position.set(0, 0, 2);
-scene.add(pointLight);
-
 /* ── Animation state ── */
 let beatVal   = 0;
 let isPlaying = false;
-const startMs = Date.now();
 
-function renderLoop() {
-    requestAnimationFrame(renderLoop);
-    const t = (Date.now() - startMs) / 1000;
+/* ── VU bar loop (runs independently, no Three.js needed) ── */
+const rsBass = document.getElementById('rs-bass');
+const rsMid  = document.getElementById('rs-mid');
+const rsBeat = document.getElementById('rs-beat');
 
+function vuLoop() {
+    requestAnimationFrame(vuLoop);
     let bass = 0, mid = 0;
     if (isPlaying) {
         const bm = engine.getBassAndMid();
         if (bm) { bass = bm.bass; mid = bm.mid; }
     }
-
-    /* idle breathe */
-    const breathe = isPlaying ? 0 : (Math.sin(t * 0.55) * 0.5 + 0.5) * 0.05;
-    const sc      = 1 + breathe + (isPlaying ? bass * 0.18 : 0);
-    innerSphere.scale.setScalar(sc);
-
-    /* rotations */
-    innerSphere.rotation.y += 0.003 + (isPlaying ? mid  * 0.009 : 0);
-    innerSphere.rotation.x  = Math.sin(t * 0.18) * 0.12;
-
-
-    /* beat decay */
     beatVal = Math.max(0, beatVal - 0.038);
-
-    /* point light pulse */
-    pointLight.intensity = 1.2 + beatVal * 2.0 + (isPlaying ? mid * 1.2 : 0);
-
-    /* uniforms */
-    innerMat.uniforms.uTime.value = t;
-    innerMat.uniforms.uBass.value = isPlaying ? bass : breathe;
-    innerMat.uniforms.uMid.value  = isPlaying ? mid  : breathe * 0.4;
-    innerMat.uniforms.uBeat.value = beatVal;
-
-    renderer.render(scene, camera);
-
-    /* ── right-strip VU bars ── */
-    const rsBass = document.getElementById('rs-bass');
-    const rsMid  = document.getElementById('rs-mid');
-    const rsBeat = document.getElementById('rs-beat');
-    if (rsBass) rsBass.style.height = Math.round((isPlaying ? bass : breathe * 0.5) * 100) + '%';
-    if (rsMid)  rsMid.style.height  = Math.round((isPlaying ? mid  : breathe * 0.3) * 100) + '%';
+    if (rsBass) rsBass.style.height = Math.round(bass  * 100) + '%';
+    if (rsMid)  rsMid.style.height  = Math.round(mid   * 100) + '%';
     if (rsBeat) rsBeat.style.height = Math.round(beatVal * 100) + '%';
 }
-renderLoop();
+vuLoop();
 
 /* ══════════════════════════════════════════════════
    SPECTRUM CANVAS
@@ -896,7 +719,7 @@ setInterval(() => {
 /* ══════════════════════════════════════════════════
    INIT RESIZE
 ══════════════════════════════════════════════════ */
-window.addEventListener('load',   () => { resizeSpec(); resizeSphere(); });
+window.addEventListener('load',   () => { resizeSpec(); });
 window.addEventListener('resize', () => { resizeSpec(); });
 </script>
 </body>
