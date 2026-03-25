@@ -1,13 +1,11 @@
-import Header from "../components/Header.tsx"
-import Navbar from "../components/Navbar.tsx"
-import "@fontsource/michroma"
-
-function Home() {
+function About() {
   return (
     <>
-      < Header />
+      <div className="page">
+        <h1>About</h1>
+      </div>
     </>
   )
 }
 
-export default Home 
+export default About 

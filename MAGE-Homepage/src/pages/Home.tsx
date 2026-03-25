@@ -5,7 +5,9 @@ import "@fontsource/michroma"
 function Home() {
   return (
     <>
-      < Header />
+      <div className="page">
+        < Header />
+      </div>
     </>
   )
 }

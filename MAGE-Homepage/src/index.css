@@ -8,13 +8,15 @@
 body {
   min-height: 100vh;
   background: var(--bgcol);
-  overflow: hidden;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scroll-behavior: auto;
   position: relative;
 }
 
 body::before {
   content: '';
-  position: absolute;
+  position: fixed;
   width: 300%;
   height: 300%;
   top: -100%;

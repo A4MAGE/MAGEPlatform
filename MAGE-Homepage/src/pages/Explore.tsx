@@ -1,13 +1,23 @@
-import Header from "../components/Header.tsx"
-import Navbar from "../components/Navbar.tsx"
-import "@fontsource/michroma"
+import Carousel from "../components/Carousel.tsx"
+import "../App.css"
 
-function Home() {
+function Explore() {
   return (
     <>
-      < Header />
+      <div className="page">
+        <h1 className="explore-header">Most Downloaded Presets of the Month</h1>
+        <Carousel />
+        <h1 className="explore-header">Most Downloaded Presets for Dubstep</h1>
+        <Carousel />
+        <h1 className="explore-header">Most Downloaded Presets for Synthwave</h1>
+        <Carousel />
+        <h1 className="explore-header">Most Downloaded Presets for Pop</h1>
+        <Carousel />
+        <h1 className="explore-header">Most Dowloaded Presets for Hip Hop</h1>
+        <Carousel />
+      </div>
     </>
   )
 }
 
-export default Home 
+export default Explore
