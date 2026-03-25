@@ -13,7 +13,8 @@
     "@fontsource/anta": "^5.2.7",
     "@fontsource/michroma": "^5.2.8",
     "react": "^19.2.0",
-    "react-dom": "^19.2.0"
+    "react-dom": "^19.2.0",
+    "react-router-dom": "^7.13.2"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.1",
