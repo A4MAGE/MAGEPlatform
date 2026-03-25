@@ -13,7 +13,8 @@
 //   engine.getPlaybackState();               // returns { playing, currentTime, duration }
 //   engine.setPlaybackState({...});          // force-set playback state (for sync)
 //   engine.syncToTimeline(time);             // sync engine to an external timeline time
-//   engine.getAnalysisData();               // returns { frequencyData, timeDomainData }
+//   engine.getAnalysisData();               // returns { frequencyData, timeDomainData, bufferLength }
+//   engine.getBassAndMid();                 // returns { bass, mid } normalized 0–1 (matches MAGE shader inputs)
 //   engine.getMetadata();                   // returns attached metadata object
 //   engine.attachMetadata(meta);            // attach/update metadata without reloading file
 //   engine.getMediaElement();               // returns the raw HTMLAudioElement (for WaveSurfer)
@@ -45,7 +46,9 @@ class AudioEngine {
         }
         this._source = this._audioCtx.createMediaElementSource(this._audio);
         this._analyser = this._audioCtx.createAnalyser();
-        this._analyser.fftSize = 2048;
+        // fftSize 64 → 32 usable frequency bins.
+        // Matches MAGE's shader system: bass at bin 2, mid at bin 4.
+        this._analyser.fftSize = 64;
         this._source.connect(this._analyser);
         this._analyser.connect(this._audioCtx.destination);
         this._analysisConnected = true;
@@ -126,7 +129,7 @@ class AudioEngine {
 
     // Returns real-time audio analysis data from the Web Audio API AnalyserNode.
     // Returns null if the analyser is not yet connected (call play() first).
-    // frequencyData: amplitude per frequency bin (Uint8Array, 0–255)
+    // frequencyData: amplitude per frequency bin (Uint8Array, 0–255), 32 bins at fftSize 64
     // timeDomainData: raw waveform samples (Uint8Array, 0–255, 128 = silence)
     getAnalysisData() {
         if (!this._analyser) return null;
@@ -136,6 +139,21 @@ class AudioEngine {
         this._analyser.getByteFrequencyData(frequencyData);
         this._analyser.getByteTimeDomainData(timeDomainData);
         return { frequencyData, timeDomainData, bufferLength };
+    }
+
+    // Returns bass and mid frequency values normalized to 0–1.
+    // Matches the exact bin indices used by MAGE's shader system:
+    //   bass → bin 2 (low frequencies)
+    //   mid  → bin 4 (mid frequencies)
+    // Returns null if the analyser is not yet connected (call play() first).
+    getBassAndMid() {
+        if (!this._analyser) return null;
+        const data = new Uint8Array(this._analyser.frequencyBinCount);
+        this._analyser.getByteFrequencyData(data);
+        return {
+            bass: data[2] / 255,
+            mid:  data[4] / 255,
+        };
     }
 
     // Attach or update metadata without reloading the audio file.

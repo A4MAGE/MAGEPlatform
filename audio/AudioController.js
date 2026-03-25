@@ -66,6 +66,12 @@ class AudioController {
         return this.engine.getAnalysisData();
     }
 
+    // Returns { bass, mid } normalized 0–1.
+    // These are the exact values MAGE's shader system consumes to drive visuals.
+    getBassAndMid() {
+        return this.engine.getBassAndMid();
+    }
+
     // Subscribe to continuous analysis data on every animation frame.
     // callback receives: { frequencyData, timeDomainData, bufferLength }
     // Returns a stop function — call it to unsubscribe.

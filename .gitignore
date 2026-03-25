@@ -1,0 +1,7 @@
+# Private / presentation files — never commit these
+slide.html
+slide.pdf
+BrandonSiscoe_MAGE-Platform_cs410-01.pdf
+
+# macOS
+.DS_Store
