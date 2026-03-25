@@ -2,7 +2,7 @@ function Contact() {
   return (
     <>
       <div className="page">
-        <h1>Contact</h1>
+        <h1 className="page-header">Contact</h1>
       </div>
     </>
   )

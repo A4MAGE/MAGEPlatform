@@ -5,15 +5,15 @@ function Explore() {
   return (
     <>
       <div className="page">
-        <h1 className="explore-header">Most Downloaded Presets of the Month</h1>
+        <h1 className="page-header">Most Downloaded Presets of the Month</h1>
         <Carousel />
-        <h1 className="explore-header">Most Downloaded Presets for Dubstep</h1>
+        <h1 className="page-header">Most Downloaded Presets for Dubstep</h1>
         <Carousel />
-        <h1 className="explore-header">Most Downloaded Presets for Synthwave</h1>
+        <h1 className="page-header">Most Downloaded Presets for Synthwave</h1>
         <Carousel />
-        <h1 className="explore-header">Most Downloaded Presets for Pop</h1>
+        <h1 className="page-header">Most Downloaded Presets for Pop</h1>
         <Carousel />
-        <h1 className="explore-header">Most Dowloaded Presets for Hip Hop</h1>
+        <h1 className="page-header">Most Dowloaded Presets for Hip Hop</h1>
         <Carousel />
       </div>
     </>

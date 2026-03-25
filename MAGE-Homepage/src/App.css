@@ -43,12 +43,9 @@
   font-size: 1.3em;
 }
 
-/* HOME PAGE */ 
-
 /* EXPLORE PAGE */ 
-
 /* Formatting */ 
-.explore-header {
+.page-header {
   color: var(--fontcolor);
   font-family: Helvetica;
   text-align: center;
@@ -72,10 +69,15 @@
 
 .embla { 
   overflow: hidden; 
+  padding: 20px 40px;
+  margin: 0 -40px;
 }
 
 .embla__container { 
-  display: flex; gap: 16px; 
+  display: flex; 
+  align-items: center;
+  gap: 16px;
+  padding: 0 16px;
 }
 
 .embla__slide { 
@@ -83,11 +85,34 @@
 }
 
 .embla__slide {
-  flex: 0 0 300px;
-  height: 200px;
+  flex: 0 0 400px;
+  height: 330px;
   border-radius: 16px;
+  background: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+/* Button */ 
+.carousel-btn {
   background: rgba(255, 255, 255, 0.08);
   border: 1px solid rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  color: var(--fontcolor);
+  border-radius: 999px;
+  width: 40px;
+  height: 40px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s ease, background 0.2s ease;
+}
+
+.carousel-btn:hover {
+  transform: scale(1.1);
+  background: rgba(255, 255, 255, 0.15);
 }
 
 /* NAVBAR */
