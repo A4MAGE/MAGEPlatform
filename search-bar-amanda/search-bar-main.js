@@ -1,73 +1,47 @@
-import { useState, useEffect } from 'react'
-import { Box, Flex, Center, chakra } from '@chakra-ui/react'
 
-import data from '../MOCK_DATA.json'
+import Fuse from 'fuse.js'
+import React, { useState } from "react";
+import data from '../mock-data.json'
 
-import { SearchIcon } from '@chakra-ui/icons'
 
-import SearchResults from './SearchResults'
+function Search() {
+  const [searchResults, setSearchResults] = useState(data);
+  const options = {
+    includeScore: true,
+    includeMatches: true,
+    threshold: 0.2,
+    keys: ["author", "name", "tag"],
+  };
 
-const Search = () => {
-	const [queryText, setQueryText] = useState('')
-	const [searchResults, setSearchResults] = useState([])
+  const fuse = new Fuse(data, options);
 
-	const handleChange = e => setQueryText(e.target.value)
 
-	useEffect(() => {
-		if (!queryText) {
-			setSearchResults([])
-			return
-		}
-	}, [queryText])
+const handleSearch = (event) => {        // moved INSIDE the component
+    const { value } = event.target;
 
-	return (
-		<Box
-			sx={{
-				rounded: 'lg',
-				overflow: 'hidden',
-				bg: 'transparent',
-				shadow: 'lg',
-				maxW: '600px',
-				width: '90%',
-				mt: '1rem',
-				mx: 'auto',
-			}}
-		>
-			<Flex pos='relative' align='strech'>
-				<chakra.input
-					type=''
-					autoComplete='off'
-					autoCorrect='off'
-					spellCheck='false'
-					maxLength={64}
-					sx={{
-						w: '100%',
-						h: '68px',
-						pl: '68px',
-						fontWeight: 'medium',
-						outline: 0,
-					}}
-					placeholder='Search'
-					value={queryText}
-					onChange={handleChange}
-				/>
+    if (value.length === 0) {
+      setSearchResults(data);              // was `initialData`
+      return;
+    }
 
-				<Center pos='absolute' left={7} h='68px'>
-					<SearchIcon color='teal.500' boxSize='20px' />
-				</Center>
-			</Flex>
+    const results = fuse.search(value);
+    const items = results.map((result) => result.item);
+    setSearchResults(items);
+  };
 
-			{queryText && (
-				<Box maxH='70vh' p='0' overflowY='auto'>
-					<Box px={4}>
-						<Box borderTopWidth='1px' pt={2} pb={4}>
-							<SearchResults searchResults={searchResults} />
-						</Box>
-					</Box>
-				</Box>
-			)}
-		</Box>
-	)
+  return (                               
+    <div>
+      <input
+        type="text"
+        onChange={handleSearch}
+        placeholder="Search..."
+      />
+      <ul>
+        {searchResults.map((item, index) => (
+          <li key={index}>{item.name}</li>  
+        ))}
+      </ul>
+    </div>
+  );
 }
-
-export default Search
+export default Search;

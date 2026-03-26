@@ -1,0 +1,69 @@
+<html>
+<head>
+  <title>Search Bar Test</title>
+  <script src="https://cdn.jsdelivr.net/npm/fuse.js/dist/fuse.min.js"></script>
+</head>
+<body>
+  <h1>Search Bar Test</h1>
+  <input type="text" id="searchInput" placeholder="Search..." disabled>
+  <button id="searchButton">Search</button>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Author</th>
+        <th>Name</th>
+        <th>Tag</th>
+      </tr>
+    </thead>
+    <tbody id="searchResults"></tbody> 
+  </table>
+
+  <script>
+    const searchInput = document.getElementById('searchInput');   // fixed ID
+    const resultsBody = document.getElementById('searchResults'); // fixed ID
+    let fuse;
+
+    fetch('mock-data.json')
+      .then(response => response.json())
+      .then(data => {
+        fuse = new Fuse(data, {
+          keys: ['author', 'name', 'tag'],
+          threshold: 0.3
+        });
+
+        searchInput.disabled = false;
+        searchInput.placeholder = "Search items...";
+
+        // Show all data on load
+        renderResults(data);
+      })
+      .catch(err => console.error("Could not load JSON:", err));
+
+    searchInput.addEventListener('input', (e) => {
+      const query = e.target.value;
+
+      if (!query) {
+        // Re-fetch or re-render all items when input is cleared
+        fuse._docs && renderResults(fuse._docs);
+        return;
+      }
+
+      const results = fuse.search(query);
+      renderResults(results.map(r => r.item));
+    });
+
+    function renderResults(items) {
+      resultsBody.innerHTML = items
+        .map(item => `
+          <tr>
+            <td>${item.author ?? 'N/A'}</td>
+            <td>${item.name ?? 'N/A'}</td>
+            <td>${item.tag ?? 'N/A'}</td>
+          </tr>
+        `)
+        .join('');
+    }
+  </script>
+</body>
+</html>
