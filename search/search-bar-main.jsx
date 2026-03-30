@@ -1,7 +1,7 @@
 
 import Fuse from 'fuse.js'
 import React, { useState, useEffect } from "react";
-import mockData from '../mock-data.json'
+import mockData from './mock-data.json'
 
 
 function Search({ data = mockData, onSelect }) {

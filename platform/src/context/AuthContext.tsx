@@ -23,6 +23,7 @@ export const AuthContextProvider = ({ children }: { children: React.ReactNode })
       await signOut(); // If user is already logged into another account, sign them out first.
     }
 
+    if (!supabase) return { success: true, data: { user: { email: "guest" } } };
     const { data, error } = await supabase.auth.signUp({
       email: email,
       password: password,
@@ -43,6 +44,7 @@ export const AuthContextProvider = ({ children }: { children: React.ReactNode })
 
   // Sign Out Function
   const signOut = async () => {
+    if (!supabase) return;
     const { error } = await supabase.auth.signOut();
 
     if (error) {
@@ -53,6 +55,7 @@ export const AuthContextProvider = ({ children }: { children: React.ReactNode })
   // Sign In Function
   const signIn = async (email: string, password: string) => {
     try {
+        if (!supabase) return { success: true, data: { user: { email: "guest" } } };
       const { data, error } = await supabase.auth.signInWithPassword({
         email: email,
         password: password,
@@ -69,6 +72,8 @@ export const AuthContextProvider = ({ children }: { children: React.ReactNode })
 
   // Setup supabase callbacks. This react code only runs once on mount, then supabase runs the AuthStateChange callback when needed.
   useEffect(() => {
+    if (!supabase) { setSession({ user: { email: "guest" } }); return; }
+
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
     });
