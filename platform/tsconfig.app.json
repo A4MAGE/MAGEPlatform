@@ -22,7 +22,18 @@
     "noUnusedParameters": true,
     "erasableSyntaxOnly": true,
     "noFallthroughCasesInSwitch": true,
-    "noUncheckedSideEffectImports": true
+    "noUncheckedSideEffectImports": true,
+
+    /* JS interop */
+    "allowJs": true,
+    "checkJs": false,
+
+    /* Path aliases — mirror vite.config.ts */
+    "paths": {
+      "@homepage/*": ["../homepage/src/*"],
+      "@audio/*": ["../audio/*"],
+      "@search/*": ["../search/*"]
+    }
   },
-  "include": ["src"]
+  "include": ["src", "../homepage/src", "../audio", "../search"]
 }

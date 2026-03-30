@@ -128,4 +128,11 @@ class AudioController {
     onBeat(callback) {
         return this.engine.onBeat(callback);
     }
+
+    // Load audio from a URL (e.g. Supabase storage link).
+    loadFromUrl(url) {
+        this.engine.setAudioUrl(url);
+    }
 }
+
+export default AudioController;

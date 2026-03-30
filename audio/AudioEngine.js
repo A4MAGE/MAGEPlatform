@@ -247,4 +247,12 @@ class AudioEngine {
     getSourceNode() {
         return this._source;
     }
+
+    // Load audio from a URL (e.g. Supabase storage link).
+    setAudioUrl(url) {
+        this._audio.src = url;
+        this._audio.load();
+    }
 }
+
+export default AudioEngine;

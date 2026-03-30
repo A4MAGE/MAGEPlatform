@@ -1,13 +1,27 @@
 import { UserAuth } from "../context/AuthContext";
 import EnginePlayer from "./mage engine/EnginePlayer";
 import PresetPreviews from "./PresetPreviews";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { supabase } from "../supabaseClient";
+// @ts-ignore
+import Search from "@search/search-bar-main";
 
 const Dashboard = () => {
   const { session, signOut } = UserAuth();
   const [presetPath, setPresetPath] = useState("");
+  const [audioSource, setAudioSource] = useState("");
+  const [presets, setPresets] = useState([]);
 
-  // We can assume session is valid because the private route protects this page from unauthorized users.
+  useEffect(() => {
+    supabase.from("preset").select("*").then(({ data, error }: { data: any; error: any }) => {
+      if (!error && data) setPresets(data);
+    });
+  }, []);
+
+  const handlePresetSelect = (item: any) => {
+    if (item.audioSource) setAudioSource(item.audioSource);
+  };
+
   return (
     <div className="dashboard-container">
       <div className="content-center-card">
@@ -16,7 +30,8 @@ const Dashboard = () => {
         <div onClick={signOut}>
           <button className="link-button">Sign Out</button>
         </div>
-        <EnginePlayer presetPath={presetPath} />
+        <Search data={presets} onSelect={handlePresetSelect} />
+        <EnginePlayer presetPath={presetPath} audioSource={audioSource} />
       </div>
       <PresetPreviews setPresetPath={setPresetPath} />
     </div>
