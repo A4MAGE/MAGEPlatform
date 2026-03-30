@@ -7,6 +7,10 @@ At this stage, this repository will be updated with each team members work, and 
 ## ./Authentication -Jason/
 - In this folder, you will find AuthContext.tsx, which is a React context provider which can be applied to our react application in order to handle user authentication.
 
+## ./amanda/search-bar
+- In this branch I created two folders: mock-data.json, search-bar-main.js, test.html
+
+
 
 ## Note:
 For more details on the audio feature, see the [audio/README.md](audio/README.md)
