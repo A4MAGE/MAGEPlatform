@@ -13,6 +13,10 @@ export default defineConfig({
       '@audio': path.resolve(__dirname, '../audio'),
       '@search': path.resolve(__dirname, '../search'),
       'fuse.js': path.resolve(__dirname, 'node_modules/fuse.js'),
+      'react': path.resolve(__dirname, 'node_modules/react'),
+      'react/jsx-runtime': path.resolve(__dirname, 'node_modules/react/jsx-runtime'),
+      'react/jsx-dev-runtime': path.resolve(__dirname, 'node_modules/react/jsx-dev-runtime'),
+      'react-dom': path.resolve(__dirname, 'node_modules/react-dom'),
     },
   },
   server: {
