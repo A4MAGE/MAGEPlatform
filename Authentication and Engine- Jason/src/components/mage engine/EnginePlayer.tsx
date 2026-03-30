@@ -1,14 +1,17 @@
 import { useEffect, useRef, useState } from "react";
 // @ts-ignore
 import { initMAGE } from "./mage-engine.mjs";
+import LoadingSpinner from "../LoadingSpinner";
 import "./engine.css";
 
 type EnginePlayerProps = {
   width?: string;
+  height?: string;
+  presetPath?: string;
   displayControls?: boolean;
 };
 
-const EnginePlayer = ({ width = "500px", displayControls = false }: EnginePlayerProps) => {
+const EnginePlayer = ({ width = "500px", height = "250px", displayControls = false, presetPath }: EnginePlayerProps) => {
   const canvasRef = useRef(null); // This will keep play button disabled when canvas ref is null
   const [engine, setEngine] = useState<any>(null);
   const [audioLoaded, setAudioLoaded] = useState(false);
@@ -40,15 +43,32 @@ const EnginePlayer = ({ width = "500px", displayControls = false }: EnginePlayer
     };
   }, []);
 
+  useEffect(() => {
+    if (presetPath) {
+      loadPreset(presetPath);
+    }
+  }, [presetPath])
+
   const playAudio = () => {
-    if (!engine) return;
+    if (!engine || !audioLoaded) return;
     engine.play();
   };
 
-  // Either display the start engine button or the canvas that the engine plays on.
+  const loadPreset = async (presetPath: any) => {
+    if (!engine) return;
+    const preset = await fetch(presetPath).then(response => response.json());
+    engine.loadPreset(preset);
+  }
+
+  // Canvas is hidden using display property and not conditional rendering to avoid issues with the canvas ref.
+  // Using conditional rendering causes issues with the engine finding the right canvas ref in the DOM.
   return (
     <div>
-      <div style={{ display: engine ? "block" : "none", width: width }}>
+      <div style={{display: !engine ? "block" : "none", width: width, height: height}}>
+        <LoadingSpinner />
+      </div>
+
+      <div style={{display: engine ? "block" : "none", width: width, height: height }}>
         <canvas ref={canvasRef} className="engine-player"></canvas>
       </div>
 

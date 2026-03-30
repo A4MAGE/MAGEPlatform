@@ -1,5 +1,6 @@
 import { Navigate } from "react-router-dom";
 import { UserAuth } from "../../context/AuthContext";
+import LoadingSpinner from "../LoadingSpinner";
 
 const PrivateRoute = ({ children }: { children: React.ReactNode }) => {
   const { session } = UserAuth();
@@ -10,7 +11,7 @@ const PrivateRoute = ({ children }: { children: React.ReactNode }) => {
     return (
       <div className="home-container">
         <div className="content-center-card">
-          <p>Loading...</p>
+          <LoadingSpinner />
         </div>
       </div>
     );

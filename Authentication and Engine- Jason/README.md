@@ -1,4 +1,4 @@
-# Authentication - Jason Courtois
+# Authentication & Engine - Jason Courtois
 
 Implemented a login demo using authentication with supabase using Supabase Javascript SDK
 
@@ -40,3 +40,7 @@ Notes for production/development:
 ### Signin/Signup/Dashboard
 - These pages are all basic .tsx pages that have signin/signup functionality
 - These pages all interact with AuthContext in order to get/modify the current user login state.
+
+### EnginePlayer.tsx
+- This component integrates the engine into a canvas which can be loaded on our engine player page.
+- Right now it just loads one audio file, and pulls presets from the public folder in the repo.

@@ -52,6 +52,7 @@ p {
 
 .link-button:disabled {
   background-color: #606264;
+  cursor: default;
 }
 
 .home-container {
@@ -59,6 +60,14 @@ p {
   display: flex;
   place-items: center;
   justify-content: center;
+}
+
+.dashboard-container {
+  height: 100vh;
+  display: flex;
+  place-items: center;
+  justify-content: center;
+  gap: 1rem;
 }
 
 .content-center-card {
