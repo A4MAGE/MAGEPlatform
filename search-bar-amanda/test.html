@@ -309,7 +309,7 @@
     resultCount.className = '';
   }
 
-  fetch('mock-data.json')
+  fetch('mock-data.json') //
     .then(r => r.json())
     .then(data => {
       allData = data;
@@ -325,7 +325,6 @@
       const query = e.target.value;
 
       if (!query) {
-        // Re-fetch or re-render all items when input is cleared
         fuse._docs && renderResults(fuse._docs);
         return;
       }
