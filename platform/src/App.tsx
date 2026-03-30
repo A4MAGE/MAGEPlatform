@@ -11,10 +11,6 @@ function App() {
     <div>
       <Navbar LinkComponent={Link} />
       <Header />
-      <div className="account-controls" style={{ marginTop: "2rem" }}>
-        <Link className="link-button" to="/signin">Login</Link>
-        <Link className="link-button" to="/signup">Register</Link>
-      </div>
     </div>
   );
 }

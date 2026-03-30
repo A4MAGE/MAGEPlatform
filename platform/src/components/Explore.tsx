@@ -8,6 +8,7 @@ const Explore = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    if (!supabase) { setLoading(false); return; }
     supabase.from("preset").select("*").then(({ data, error }: { data: any; error: any }) => {
       if (!error && data) setPresets(data);
       setLoading(false);

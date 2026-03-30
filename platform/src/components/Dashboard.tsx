@@ -13,6 +13,7 @@ const Dashboard = () => {
   const [presets, setPresets] = useState([]);
 
   useEffect(() => {
+    if (!supabase) return;
     supabase.from("preset").select("*").then(({ data, error }: { data: any; error: any }) => {
       if (!error && data) setPresets(data);
     });
