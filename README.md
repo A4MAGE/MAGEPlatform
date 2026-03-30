@@ -20,8 +20,10 @@ Main homepage and landing page. React app with navigation, header, and the entry
 - `./search/` — Search bar feature with mock data and test page
 - `./database/` — SQL schema and database structure for the platform
 
+### Gladys - ./server_endpoint/ and ./audio/AudioController.js
 ---
-
+- added a backend server endpoint to add into presets table.
+- modified AudioController.js for audioside commands
 ## Structure
 
 ```
