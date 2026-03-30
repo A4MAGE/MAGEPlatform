@@ -9,3 +9,5 @@ preset-pack.zip
 
 # macOS
 .DS_Store
+*.MP3
+*.mp3
