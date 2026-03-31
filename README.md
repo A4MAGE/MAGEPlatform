@@ -10,23 +10,22 @@ At this stage, this repository will be updated with each team members work, and 
 
 ## Contributors
 
-### Yazeed — `./audio/`
-Audio engine and player UI. Contains the core audio processing logic, controller, and browser-based player interface.
+All team members contribute across the full platform. The sections below reflect each person's primary area of ownership and leadership — not the limit of their contributions.
 
-### Jason — `./platform/`
-Authentication system and MAGE engine integration. Full React app with user sign-in, sign-up, and the visual engine component.
+### Yazeed
+Primary area: `./audio/` — Audio engine architecture, player UI, and browser-based audio processing. Also contributed to platform integration and deployment.
 
-### Roni — `./homepage/`
-Main homepage and landing page. React app with navigation, header, and the entry point for the platform.
+### Jason
+Primary area: `./platform/` — React application, user authentication (sign-in, sign-up, protected routes), and MAGE visual engine integration.
 
-### Amanda — `./search/` and `./database/`
-- `./search/` — Search bar feature with mock data and test page
-- `./database/` — SQL schema and database structure for the platform
+### Roni
+Primary area: `./homepage/` — Landing page design, navbar, header, and the visual identity of the platform.
 
-### Gladys - ./server_endpoint/ and ./audio/AudioController.js
----
-- added a backend server endpoint to add into presets table.
-- modified AudioController.js for audioside commands
+### Amanda
+Primary areas: `./search/` and `./database/` — Search bar feature, preset data structure, and SQL database schema design.
+
+### Gladys
+Primary areas: `./server_endpoint/` and `./audio/AudioController.js` — Backend server endpoint for preset management, Supabase database setup, and audio controller integration.
 ## Structure
 
 ```
