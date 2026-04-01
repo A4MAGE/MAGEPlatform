@@ -20,6 +20,7 @@ export const router = createHashRouter([
       { path: "/signup", element: <Signup /> },
       { path: "/signin", element: <Signin /> },
       { path: "/login", element: <Navigate to="/signin" replace /> },
+      { path: "/engine", element: <div className="page"><h1 className="page-header">Engine</h1></div> },
       {
         path: "/dashboard",
         element: (
