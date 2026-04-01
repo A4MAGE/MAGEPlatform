@@ -19,6 +19,8 @@ export default defineConfig({
       'react-dom': path.resolve(__dirname, 'node_modules/react-dom'),
       'react-router-dom': path.resolve(__dirname, 'node_modules/react-router-dom'),
       'embla-carousel-react': path.resolve(__dirname, 'node_modules/embla-carousel-react'),
+      '@fontsource/michroma': path.resolve(__dirname, 'node_modules/@fontsource/michroma'),
+      '@fontsource/anta': path.resolve(__dirname, 'node_modules/@fontsource/anta'),
     },
   },
   server: {
