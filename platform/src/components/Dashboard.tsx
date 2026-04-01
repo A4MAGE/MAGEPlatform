@@ -1,19 +1,11 @@
 import { UserAuth } from "../context/AuthContext";
 import EnginePlayer from "./mage engine/EnginePlayer";
 import PresetPreviews from "./PresetPreviews";
-import { useState, useEffect, Component, type ReactNode } from "react";
+import { useState, useEffect } from "react";
 import { supabase } from "../supabaseClient";
 // @ts-ignore
 import Search from "@search/search-bar-main";
 
-class EngineErrorBoundary extends Component<{ children: ReactNode }, { hasError: boolean }> {
-  state = { hasError: false };
-  static getDerivedStateFromError() { return { hasError: true }; }
-  render() {
-    if (this.state.hasError) return <p style={{ color: "#aaa" }}>Engine failed to load.</p>;
-    return this.props.children;
-  }
-}
 
 const Dashboard = () => {
   const { session, signOut } = UserAuth();
@@ -41,9 +33,7 @@ const Dashboard = () => {
           <button className="link-button">Sign Out</button>
         </div>
         <Search data={presets} onSelect={handlePresetSelect} />
-        <EngineErrorBoundary>
-          <EnginePlayer presetPath={presetPath} audioSource={audioSource} />
-        </EngineErrorBoundary>
+        <EnginePlayer presetPath={presetPath} audioSource={audioSource} />
       </div>
       <PresetPreviews setPresetPath={setPresetPath} />
     </div>

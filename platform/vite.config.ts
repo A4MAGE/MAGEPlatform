@@ -23,6 +23,19 @@ export default defineConfig({
       '@fontsource/anta': path.resolve(__dirname, 'node_modules/@fontsource/anta'),
     },
   },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'mage-engine': [path.resolve(__dirname, 'src/components/mage engine/mage-engine.mjs')],
+        },
+      },
+    },
+    minify: 'esbuild',
+  },
+  esbuild: {
+    keepNames: true,
+  },
   server: {
     fs: {
       allow: [path.resolve(__dirname, '..')],
