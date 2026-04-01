@@ -15,7 +15,7 @@ function Search({ data = mockData, onSelect }) {
     includeScore: true,
     includeMatches: true,
     threshold: 0.2,
-    keys: ["username", "name", "tag"],
+    keys: ["username", "name", "tag", "audioSource"],
   };
 
   const fuse = new Fuse(data, options);
