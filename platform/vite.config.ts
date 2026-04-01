@@ -31,10 +31,7 @@ export default defineConfig({
         },
       },
     },
-    minify: 'esbuild',
-  },
-  esbuild: {
-    keepNames: true,
+    minify: false,
   },
   server: {
     fs: {
