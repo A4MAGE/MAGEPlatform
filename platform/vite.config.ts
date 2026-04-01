@@ -24,14 +24,7 @@ export default defineConfig({
     },
   },
   build: {
-    rollupOptions: {
-      output: {
-        manualChunks: {
-          'mage-engine': [path.resolve(__dirname, 'src/components/mage engine/mage-engine.mjs')],
-        },
-      },
-    },
-    minify: false,
+    minify: 'esbuild',
   },
   server: {
     fs: {
