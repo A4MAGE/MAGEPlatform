@@ -4,9 +4,8 @@ Implemented a login demo using authentication with supabase using Supabase Javas
 
 Notes for production/development:
 - For errors within AuthContext - do not leave data within console log, this is just for development purposes.
-- Low rate limit - New user signup has a rate limit of 2 emails per hour. Even for a low use application this might be too low.
-  - Workaround - Adapt google SSO later on which has a higher limit of 30 sign ups per hour [Rate Limit Docs](https://supabase.com/docs/guides/auth/rate-limits)
 - Avoid using React Compiler! I had several issues with the order at which page reloads were called due to the compilers attempts at optimization. After disabling the react compiler these issues went away.
+- Several errors are generated when calling engine.dispose(); with the MAGE engine. Brandon has been made aware of this issue and was working on a patch.
 
 ## Summary of how this code works
 - supabaseClient.ts: establishes a connection to supabase via API keys that are safe to have on frontend applications. [Supabase API Key Docs](https://supabase.com/docs/guides/api/api-keys)
@@ -14,6 +13,10 @@ Notes for production/development:
 - AuthContext.tsx: Most important piece of code here, stores current login info on users browser so each page can display user content. [Supabase React Docs](https://supabase.com/docs/guides/auth/quickstarts/react) 
 
 - App.tsx/Signin.tsx/Signup.tsx/Dashboard.tsx are all basic/incomplete pages to show the functionality of the auth system using the React Router to switch between pages.
+
+- EnginePlayer.tsx - Loads the MAGE engine with the selected preset and CSS properties like width and height.
+
+- Dashboard.tsx - Manages preset and audio state to be controlled with the MAGE engine and audio controller respectively.
 
 ### AuthContext.tsx
 - This context provider keeps track of the users current login session information.
@@ -37,9 +40,13 @@ Notes for production/development:
 - Wrapper component that protects pages from users who aren't logged in
 - Checks to see if session is set to null, if it is, then it navigates back to websites home page
 
-### Signin/Signup/Dashboard
-- These pages are all basic .tsx pages that have signin/signup functionality
+### Signin.tsx/Signup.tsx
+- Both pages are all basic .tsx pages that have signin/signup functionality
 - These pages all interact with AuthContext in order to get/modify the current user login state.
+
+### Dashboard.tsx
+- Manages the state of EnginePlayer and audio controller.
+- This will allow the user to easily select audio tracks and different presets.
 
 ### EnginePlayer.tsx
 - This component integrates the engine into a canvas which can be loaded on our engine player page.

@@ -1,0 +1,11 @@
+.preset-previews {
+  display: flex;
+  flex-direction: column;
+  max-height: 50vh;
+  background-color: rgb(68, 68, 68);
+  gap: 1rem;
+  padding: 1rem;
+  border-radius: 1.5rem;
+  filter: drop-shadow(4px 4px 8px rgba(0, 0, 0, 0.5));
+  overflow-y: auto;
+}
