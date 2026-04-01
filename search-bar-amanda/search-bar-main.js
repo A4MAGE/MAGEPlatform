@@ -10,7 +10,7 @@ function Search() {
     includeScore: true,
     includeMatches: true,
     threshold: 0.2,
-    keys: ["author", "name", "tag"],
+    keys: ["author", "name", "tag", "audioSource"],
   };
 
   const fuse = new Fuse(data, options);

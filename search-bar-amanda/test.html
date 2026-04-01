@@ -313,7 +313,7 @@
     .then(r => r.json())
     .then(data => {
       allData = data;
-      fuse = new Fuse(data, { keys: ['author', 'name', 'tag'], threshold: 0.3 });
+      fuse = new Fuse(data, { keys: ['author', 'name', 'tag', "audioSource"], threshold: 0.3 });
       searchInput.disabled = false;
       searchInput.placeholder = 'Search by author, name, or tag…';
       renderResults(data);
