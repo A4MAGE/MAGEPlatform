@@ -18,7 +18,7 @@ function Navbar() {
           </ul>
         </div>
         <div className="login-btn">
-          <a href="login">Log In</a>
+          <NavLink to="/signin">Log In</NavLink>
         </div>
       </div>
     </>
