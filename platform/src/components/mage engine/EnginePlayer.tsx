@@ -1,12 +1,32 @@
 import { useEffect, useRef, useState } from "react";
 // @ts-ignore
-import { initMAGE } from "./mage-engine.mjs";
-// @ts-ignore
 import AudioEngine from "@audio/AudioEngine";
 // @ts-ignore
 import AudioController from "@audio/AudioController";
 import LoadingSpinner from "../LoadingSpinner";
 import "./engine.css";
+
+// Load mage-engine at runtime from public/ to avoid Rollup transforming eval() scopes
+function loadMageEngine(): Promise<any> {
+  return new Promise((resolve, reject) => {
+    if ((window as any).__mageEngineModule) {
+      resolve((window as any).__mageEngineModule);
+      return;
+    }
+    const script = document.createElement("script");
+    script.type = "module";
+    script.textContent = `
+      import { initMAGE, MAGEEngine, MAGEPreset } from "${import.meta.env.BASE_URL}mage-engine.mjs";
+      window.__mageEngineModule = { initMAGE, MAGEEngine, MAGEPreset };
+      window.dispatchEvent(new Event("mage-engine-loaded"));
+    `;
+    window.addEventListener("mage-engine-loaded", () => {
+      resolve((window as any).__mageEngineModule);
+    }, { once: true });
+    script.onerror = reject;
+    document.head.appendChild(script);
+  });
+}
 
 type EnginePlayerProps = {
   width?: string;
@@ -30,31 +50,37 @@ const EnginePlayer = ({
 
   useEffect(() => {
     if (!canvasRef.current) return;
+    let disposed = false;
+    let mageEngine: any = null;
 
-    const { engine: mageEngine } = initMAGE({
-      canvas: canvasRef.current,
-      withControls: displayControls,
-      autoStart: true,
-      options: { log: true },
+    loadMageEngine().then(({ initMAGE }) => {
+      if (disposed || !canvasRef.current) return;
+
+      const result = initMAGE({
+        canvas: canvasRef.current,
+        withControls: displayControls,
+        autoStart: true,
+        options: { log: true },
+      });
+      mageEngine = result.engine;
+      setEngine(mageEngine);
+
+      const ae = new AudioEngine();
+      const ac = new AudioController(ae);
+      setAudioController(ac);
+
+      const defaultUrl =
+        "https://bnovkavuiekmkanohxpm.supabase.co/storage/v1/object/public/TempPublicMusic/rick.mp3";
+      mageEngine.loadAudio(defaultUrl, () => setAudioLoaded(true));
+      ac.loadFromUrl(defaultUrl);
     });
 
-    setEngine(mageEngine);
-
-    const ae = new AudioEngine();
-    const ac = new AudioController(ae);
-    setAudioController(ac);
-
-    const defaultUrl =
-      "https://bnovkavuiekmkanohxpm.supabase.co/storage/v1/object/public/TempPublicMusic/rick.mp3";
-    mageEngine.loadAudio(defaultUrl, () => setAudioLoaded(true));
-    ac.loadFromUrl(defaultUrl);
-
     return () => {
+      disposed = true;
       if (mageEngine) mageEngine.dispose();
     };
   }, []);
 
-  // When a preset's audio source changes, reload both players
   useEffect(() => {
     if (audioSource && engine && audioController) {
       setAudioLoaded(false);
