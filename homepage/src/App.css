@@ -84,12 +84,11 @@
   padding: 0 16px;
 }
 
-.embla__slide { 
-  flex: 0 0 18%; 
+.embla__slide {
+  flex: 0 0 400px;  
 }
 
-.embla__slide {
-  flex: 0 0 400px;
+.carousel-slide-content {
   height: 330px;
   border-radius: 16px;
   background: rgba(255, 255, 255, 0.2);

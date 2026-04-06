@@ -15,7 +15,7 @@ function Search({ data = mockData, onSelect }) {
     includeScore: true,
     includeMatches: true,
     threshold: 0.2,
-    keys: ["author", "name", "tag"],
+    keys: ["username", "name", "tag"],
   };
 
   const fuse = new Fuse(data, options);
@@ -47,7 +47,7 @@ function Search({ data = mockData, onSelect }) {
             onClick={() => onSelect && onSelect(item)}
             style={{ cursor: onSelect ? 'pointer' : 'default' }}
           >
-            {item.name} — {item.author}
+            {item.name} — {item.username}
           </li>
         ))}
       </ul>

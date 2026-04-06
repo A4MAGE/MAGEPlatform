@@ -17,7 +17,16 @@ function Carousel() {
   const scrollNext = () => emblaApi?.scrollNext();
 
   const getSlideStyle = (index) => {
-    const distance = Math.abs(index - selectedIndex);
+    let distance = Math.abs(index - selectedIndex);
+    
+    // These if statements handle the edge cases of the beginning and ending items having a correct distance.
+    // We don't need to worry about the edge case of the carousel only having 1 or 2 items, as 3 is required minimum for embla.
+    if (index == items.length - 1 && selectedIndex == 0) {
+      distance = 1;
+    } else if (index == 0 && selectedIndex == items.length - 1) {
+      distance = 1;
+    }
+
     const scale = Math.max(0.7, 1 - distance * 0.1);
     const opacity = Math.max(0.3, 1 - distance * 0.4);
     const blur = distance * 2;
@@ -36,8 +45,11 @@ function Carousel() {
         <div className="embla" ref={emblaRef}>
           <div className="embla__container">
             {items.map((item, index) => (
-              <div className="embla__slide" key={item.id} style={getSlideStyle(index)}>
-                {item.title}
+              <div className="embla__slide" key={item.id}>
+                {/* Content of slide needs to be in child div so it doesn't conflict with embla styling. */}
+                <div className="carousel-slide-content" style={getSlideStyle(index)}>
+                  {item.title}
+                </div>
               </div>
             ))}
           </div>

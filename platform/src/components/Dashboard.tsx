@@ -15,9 +15,12 @@ const Dashboard = () => {
 
   useEffect(() => {
     if (!supabase) return;
-    supabase.from("preset").select("*").then(({ data, error }: { data: any; error: any }) => {
-      if (!error && data) setPresets(data);
-    });
+    supabase
+      .from("preset_with_username")
+      .select("*")
+      .then(({ data, error }: { data: any; error: any }) => {
+        if (!error && data) setPresets(data);
+      });
   }, []);
 
   const handlePresetSelect = (item: any) => {
