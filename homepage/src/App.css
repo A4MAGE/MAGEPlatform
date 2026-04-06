@@ -191,9 +191,21 @@
   font-family: Helvetica;
   text-decoration: none;
   color: var(--fontcolor);
+  transition: transform 0.2s ease, color 0.2s ease;
 } 
 
+.login-btn a:hover {
+  transform: scale(1.12);
+  color: var(--highlight-font);
+}
+
 /* NAVBAR */ 
+
+#home, #explore, #engine {
+  min-height: 100vh;
+  padding: 80px 0;        
+  margin-bottom: 100px;   
+}
 
 /* No select */ 
 .noselect {

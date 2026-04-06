@@ -34,11 +34,7 @@ function Navbar() {
           <ul>
             {sections.map(id => (
               <li key={id}>
-                
-                  onClick={() => scrollTo(id)}
-                  className={active === id ? 'active' : ''}
-                  style={{ cursor: 'pointer' }}
-                >
+                <a onClick={() => scrollTo(id)} className={active === id ? 'active' : ''} style={{ cursor: 'pointer' }}>
                   {id.charAt(0).toUpperCase() + id.slice(1)}
                 </a>
               </li>
