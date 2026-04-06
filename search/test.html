@@ -309,13 +309,13 @@
     resultCount.className = '';
   }
 
-  fetch('mock-data.json') //
+  fetch('@supabase/supabase-js') 
     .then(r => r.json())
     .then(data => {
       allData = data;
-      fuse = new Fuse(data, { keys: ['author', 'name', 'tag', "audioSource"], threshold: 0.3 });
+      fuse = new Fuse(data, { keys: ['username', 'name', 'description'], threshold: 0.3 });
       searchInput.disabled = false;
-      searchInput.placeholder = 'Search by author, name, or tag…';
+      searchInput.placeholder = 'Search by username, name, or description…';
       renderResults(data);
       updateCount(data.length, data.length);
     })
