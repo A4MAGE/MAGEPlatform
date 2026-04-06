@@ -3,6 +3,11 @@ import Signup from "./components/authentication/Signup";
 import Signin from "./components/authentication/Signin";
 import Dashboard from "./components/Dashboard";
 import PrivateRoute from "./components/authentication/PrivateRoute";
+import Explore from "./components/Explore";
+import Player from "./components/Player";
+import MyPresets from "./components/MyPresets";
+import Broadcast from "./components/Broadcast";
+import SidebarLayout from "./components/SidebarLayout";
 import { AuthContextProvider } from "./context/AuthContext";
 // @ts-ignore — homepage's full app with Navbar + Routes (their code, untouched)
 import HomepageApp from "@homepage/App";
@@ -17,18 +22,28 @@ export const router = createHashRouter([
   {
     element: <AuthLayout />,
     children: [
+      // Public pages — no sidebar
       { path: "/signup", element: <Signup /> },
       { path: "/signin", element: <Signin /> },
       { path: "/login", element: <Navigate to="/signin" replace /> },
-      { path: "/engine", element: <div className="page"><h1 className="page-header">Engine</h1></div> },
+
+      // Authenticated pages — sidebar layout
       {
-        path: "/dashboard",
         element: (
           <PrivateRoute>
-            <Dashboard />
+            <SidebarLayout />
           </PrivateRoute>
         ),
+        children: [
+          { path: "/dashboard", element: <Dashboard /> },
+          { path: "/explore", element: <Explore /> },
+          { path: "/player", element: <Player /> },
+          { path: "/my-presets", element: <MyPresets /> },
+          { path: "/broadcast", element: <Broadcast /> },
+        ],
       },
+
+      // Homepage catch-all
       { path: "/*", element: <HomepageApp /> },
     ],
   },

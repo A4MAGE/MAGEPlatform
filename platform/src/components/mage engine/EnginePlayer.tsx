@@ -69,10 +69,10 @@ const EnginePlayer = ({
       const ac = new AudioController(ae);
       setAudioController(ac);
 
-      const defaultUrl =
-        "https://bnovkavuiekmkanohxpm.supabase.co/storage/v1/object/public/TempPublicMusic/rick.mp3";
-      mageEngine.loadAudio(defaultUrl, () => setAudioLoaded(true));
-      ac.loadFromUrl(defaultUrl);
+      if (audioSource) {
+        mageEngine.loadAudio(audioSource, () => setAudioLoaded(true));
+        ac.loadFromUrl(audioSource);
+      }
     });
 
     return () => {
