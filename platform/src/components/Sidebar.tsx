@@ -1,4 +1,6 @@
 import { NavLink } from "react-router-dom";
+// @ts-ignore
+import MageLogo from "@homepage/assets/favicon.svg";
 import "./Sidebar.css";
 
 const tabs = [
@@ -22,7 +24,9 @@ const Sidebar = ({ collapsed, onToggle }: SidebarProps) => {
       </button>
       {!collapsed && (
         <>
-          <div className="sidebar-logo">MAGE</div>
+          <div className="sidebar-logo">
+            <img src={MageLogo} alt="MAGE" className="sidebar-logo-img" />
+          </div>
           <ul className="sidebar-tabs">
             {tabs.map((tab) => (
               <li key={tab.path}>
