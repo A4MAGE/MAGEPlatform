@@ -19,31 +19,32 @@ type SidebarProps = {
 const Sidebar = ({ collapsed, onToggle }: SidebarProps) => {
   return (
     <nav className={collapsed ? "sidebar sidebar--collapsed" : "sidebar"}>
+      <div className="sidebar-header">
+        <img src={MageLogo} alt="MAGE" className="sidebar-logo-img" />
+        {!collapsed && <span className="sidebar-logo-text">MAGE</span>}
+      </div>
+
+      {!collapsed && (
+        <ul className="sidebar-tabs">
+          {tabs.map((tab) => (
+            <li key={tab.path}>
+              <NavLink
+                to={tab.path}
+                className={({ isActive }) =>
+                  "sidebar-tab" + (isActive ? " sidebar-tab--active" : "")
+                }
+              >
+                <span className="sidebar-tab-icon">{tab.icon}</span>
+                <span className="sidebar-tab-label">{tab.label}</span>
+              </NavLink>
+            </li>
+          ))}
+        </ul>
+      )}
+
       <button className="sidebar-toggle" onClick={onToggle}>
         {collapsed ? "▸" : "◂"}
       </button>
-      {!collapsed && (
-        <>
-          <div className="sidebar-logo">
-            <img src={MageLogo} alt="MAGE" className="sidebar-logo-img" />
-          </div>
-          <ul className="sidebar-tabs">
-            {tabs.map((tab) => (
-              <li key={tab.path}>
-                <NavLink
-                  to={tab.path}
-                  className={({ isActive }) =>
-                    "sidebar-tab" + (isActive ? " sidebar-tab--active" : "")
-                  }
-                >
-                  <span className="sidebar-tab-icon">{tab.icon}</span>
-                  <span className="sidebar-tab-label">{tab.label}</span>
-                </NavLink>
-              </li>
-            ))}
-          </ul>
-        </>
-      )}
     </nav>
   );
 };
