@@ -35,14 +35,6 @@
   filter: drop-shadow(0 0 12px rgba(118, 219, 202, 0.7));
 }
 
-.sidebar-logo-text {
-  font-family: "Michroma", sans-serif;
-  font-size: 1.2rem;
-  color: #fffbdb;
-  letter-spacing: 3px;
-  text-shadow: 0 0 8px rgba(255, 251, 219, 0.2);
-}
-
 /* Tabs */
 .sidebar-tabs {
   list-style: none;

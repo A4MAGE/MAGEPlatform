@@ -21,7 +21,6 @@ const Sidebar = ({ collapsed, onToggle }: SidebarProps) => {
     <nav className={collapsed ? "sidebar sidebar--collapsed" : "sidebar"}>
       <div className="sidebar-header">
         <img src={MageLogo} alt="MAGE" className="sidebar-logo-img" />
-        {!collapsed && <span className="sidebar-logo-text">MAGE</span>}
       </div>
 
       {!collapsed && (
