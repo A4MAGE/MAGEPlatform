@@ -42,7 +42,7 @@ function Navbar() {
           </ul>
         </div>
         <div className="login-btn">
-          <a href="/MAGEPlatform/#/signin">Log In</a>
+          <a href="/MAGEPlatform/signin">Log In</a>
         </div>
       </div>
     </>

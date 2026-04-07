@@ -1,4 +1,4 @@
-import { createHashRouter, Navigate, Outlet } from "react-router-dom";
+import { createBrowserRouter, Navigate, Outlet } from "react-router-dom";
 import Signup from "./components/authentication/Signup";
 import Signin from "./components/authentication/Signin";
 import Dashboard from "./components/Dashboard";
@@ -18,7 +18,7 @@ const AuthLayout = () => (
   </AuthContextProvider>
 );
 
-export const router = createHashRouter([
+export const router = createBrowserRouter([
   {
     element: <AuthLayout />,
     children: [
