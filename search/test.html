@@ -1,12 +1,285 @@
-<html>
+<!DOCTYPE html>
+<html lang="en">
 <head>
-  <title>Search Bar Test</title>
-  <script src="https://cdn.jsdelivr.net/npm/fuse.js/dist/fuse.min.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Search Bar</title>
+<script src="https://cdn.jsdelivr.net/npm/fuse.js/dist/fuse.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Mono:wght@400;500&family=Syne:wght@400;600&display=swap" rel="stylesheet">
+
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0e0e0f;
+    --surface: #161618;
+    --surface-2: #1e1e21;
+    --border: rgba(255,255,255,0.07);
+    --border-hover: rgba(255,255,255,0.14);
+    --text: #f0ede8;
+    --text-muted: #7c7a78;
+    --text-dim: #4a4847;
+    --accent: #c8f07a;
+    --accent-dim: rgba(200,240,122,0.12);
+    --accent-text: #0e0e0f;
+    --tag-bg: #2a2a2e;
+    --tag-text: #b0ada8;
+  }
+
+  body {
+    font-family: 'Syne', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding: 4rem 2rem;
+  }
+
+  .container {
+    max-width: 860px;
+    margin: 0 auto;
+  }
+
+  header {
+    margin-bottom: 3.5rem;
+  }
+
+  .eyebrow {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .eyebrow::before {
+    content: '';
+    display: inline-block;
+    width: 18px;
+    height: 1px;
+    background: var(--accent);
+  }
+
+  h1 {
+    font-family: 'Instrument Serif', serif;
+    font-size: clamp(2.4rem, 5vw, 3.8rem);
+    font-weight: 400;
+    line-height: 1.05;
+    color: var(--text);
+    letter-spacing: -0.02em;
+  }
+
+  h1 em {
+    font-style: italic;
+    color: var(--accent);
+  }
+
+  .search-wrapper {
+    position: relative;
+    margin-bottom: 2rem;
+  }
+
+  .search-icon {
+    position: absolute;
+    left: 18px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 16px;
+    height: 16px;
+    color: var(--text-muted);
+    pointer-events: none;
+    transition: color 0.2s;
+  }
+
+  #searchInput {
+    width: 100%;
+    padding: 16px 18px 16px 48px;
+    font-family: 'Syne', sans-serif;
+    font-size: 15px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    color: var(--text);
+    outline: none;
+    transition: border-color 0.2s, background 0.2s;
+    -webkit-appearance: none;
+  }
+
+  #searchInput::placeholder {
+    color: var(--text-dim);
+  }
+
+  #searchInput:focus {
+    border-color: var(--border-hover);
+    background: var(--surface-2);
+  }
+
+  #searchInput:focus + .search-icon,
+  .search-wrapper:focus-within .search-icon {
+    color: var(--accent);
+  }
+
+  .search-meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+  }
+
+  #resultCount {
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+
+  #resultCount span {
+    color: var(--accent);
+    font-weight: 500;
+  }
+
+  .loading-indicator {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    color: var(--text-dim);
+  }
+
+  .dot {
+    width: 4px;
+    height: 4px;
+    background: var(--accent);
+    border-radius: 50%;
+    animation: pulse 1.2s ease-in-out infinite;
+  }
+
+  .dot:nth-child(2) { animation-delay: 0.2s; }
+  .dot:nth-child(3) { animation-delay: 0.4s; }
+
+  @keyframes pulse {
+    0%, 80%, 100% { opacity: 0.2; transform: scale(0.8); }
+    40% { opacity: 1; transform: scale(1); }
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  thead th {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    text-align: left;
+    padding: 0 16px 12px;
+    border-bottom: 1px solid var(--border);
+    font-weight: 400;
+  }
+
+  thead th:first-child { padding-left: 0; }
+
+  tbody tr {
+    border-bottom: 1px solid var(--border);
+    transition: background 0.15s;
+    animation: fadeIn 0.25s ease both;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(4px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  tbody tr:hover {
+    background: var(--surface);
+  }
+
+  tbody td {
+    padding: 14px 16px;
+    font-size: 14px;
+    color: var(--text);
+    vertical-align: middle;
+  }
+
+  tbody td:first-child {
+    padding-left: 0;
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  .td-name {
+    color: var(--text-muted);
+  }
+
+  .tag {
+    display: inline-block;
+    padding: 3px 10px;
+    background: var(--tag-bg);
+    color: var(--tag-text);
+    border-radius: 100px;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.04em;
+    border: 1px solid transparent;
+    transition: border-color 0.2s, color 0.2s, background 0.2s;
+  }
+
+  tbody tr:hover .tag {
+    border-color: var(--border-hover);
+    color: var(--text);
+  }
+
+  .empty-state {
+    padding: 3rem 0;
+    text-align: center;
+    color: var(--text-dim);
+  }
+
+  .empty-state p {
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+  }
+
+  .empty-state strong {
+    display: block;
+    font-family: 'Instrument Serif', serif;
+    font-size: 1.4rem;
+    font-weight: 400;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+  }
+
+  #searchButton { display: none; }
+</style>
 </head>
 <body>
-  <h1>Search Bar Test</h1>
-  <input type="text" id="searchInput" placeholder="Search..." disabled>
-  <button id="searchButton">Search</button>
+<div class="container">
+  <header>
+    <div class="eyebrow">Presets</div>
+    <h1>Search Bar</h1>
+  </header>
+
+  <div class="search-wrapper">
+    <input type="text" id="searchInput" placeholder="Search by author, name, or tag…" disabled>
+    <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="11" cy="11" r="8"></circle>
+      <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+    </svg>
+  </div>
+
+  <div class="search-meta">
+    <div id="resultCount" class="loading-indicator">
+      <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+      Loading…
+    </div>
+  </div>
 
   <table>
     <thead>
@@ -16,35 +289,42 @@
         <th>Tag</th>
       </tr>
     </thead>
-    <tbody id="searchResults"></tbody> 
+    <tbody id="searchResults"></tbody>
   </table>
+</div>
 
-  <script>
-    const searchInput = document.getElementById('searchInput');   // fixed ID
-    const resultsBody = document.getElementById('searchResults'); // fixed ID
-    let fuse;
+<script>
+  const searchInput = document.getElementById('searchInput');
+  const resultsBody = document.getElementById('searchResults');
+  const resultCount = document.getElementById('resultCount');
+  let fuse;
+  let allData = [];
 
-    fetch('mock-data.json')
-      .then(response => response.json())
-      .then(data => {
-        fuse = new Fuse(data, {
-          keys: ['author', 'name', 'tag'],
-          threshold: 0.3
-        });
+  function updateCount(n, total) {
+    if (n === total) {
+      resultCount.innerHTML = `<span>${n}</span> items`;
+    } else {
+      resultCount.innerHTML = `<span>${n}</span> of ${total} results`;
+    }
+    resultCount.className = '';
+  }
 
-        searchInput.disabled = false;
-        searchInput.placeholder = "Search items...";
-
-        // Show all data on load
-        renderResults(data);
-      })
-      .catch(err => console.error("Could not load JSON:", err));
+  fetch('@supabase/supabase-js') 
+    .then(r => r.json())
+    .then(data => {
+      allData = data;
+      fuse = new Fuse(data, { keys: ['username', 'name', 'description'], threshold: 0.3 });
+      searchInput.disabled = false;
+      searchInput.placeholder = 'Search by username, name, or description…';
+      renderResults(data);
+      updateCount(data.length, data.length);
+    })
+   .catch(err => console.error("Could not load JSON:", err));
 
     searchInput.addEventListener('input', (e) => {
       const query = e.target.value;
 
       if (!query) {
-        // Re-fetch or re-render all items when input is cleared
         fuse._docs && renderResults(fuse._docs);
         return;
       }
@@ -53,17 +333,31 @@
       renderResults(results.map(r => r.item));
     });
 
-    function renderResults(items) {
-      resultsBody.innerHTML = items
-        .map(item => `
-          <tr>
-            <td>${item.author ?? 'N/A'}</td>
-            <td>${item.name ?? 'N/A'}</td>
-            <td>${item.tag ?? 'N/A'}</td>
-          </tr>
-        `)
-        .join('');
+  searchInput.addEventListener('input', e => {
+    const query = e.target.value.trim();
+    if (!query) {
+      renderResults(allData);
+      updateCount(allData.length, allData.length);
+      return;
     }
-  </script>
+    const results = fuse.search(query).map(r => r.item);
+    renderResults(results);
+    updateCount(results.length, allData.length);
+  });
+
+  function renderResults(items) {
+    if (!items.length) {
+      resultsBody.innerHTML = `<tr><td colspan="3"><div class="empty-state"><strong>Nothing here.</strong><p>Try a different search term.</p></div></td></tr>`;
+      return;
+    }
+    resultsBody.innerHTML = items.map((item, i) => `
+      <tr style="animation-delay: ${i * 30}ms">
+        <td>${item.author ?? 'N/A'}</td>
+        <td class="td-name">${item.name ?? 'N/A'}</td>
+        <td><span class="tag">${item.tag ?? 'N/A'}</span></td>
+      </tr>
+    `).join('');
+  }
+</script>
 </body>
 </html>

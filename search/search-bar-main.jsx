@@ -1,58 +1,44 @@
 
 import Fuse from 'fuse.js'
-import React, { useState, useEffect } from "react";
-import mockData from './mock-data.json'
+import React, { useState } from "react";
+import { createClient } from '@supabase/supabase-js'
+
+const supabase = createClient(
+  import.meta.env.VITE_SUPABASE_URL,
+  import.meta.env.VITE_SUPABASE_PUBLISHABLE_DEFAULT_KEY
+);
 
 
-function Search({ data = mockData, onSelect }) {
-  const [searchResults, setSearchResults] = useState(data);
+function Search({ data, onSelect }) {
+  const [presets, setPresets] = useState([]);
 
   useEffect(() => {
-    setSearchResults(data);
-  }, [data]);
-
-  const options = {
-    includeScore: true,
-    includeMatches: true,
-    threshold: 0.2,
-    keys: ["username", "name", "tag"],
-  };
-
-  const fuse = new Fuse(data, options);
-
-  const handleSearch = (event) => {
-    const { value } = event.target;
-
-    if (value.length === 0) {
-      setSearchResults(data);
+    if (data) {
+      setPresets(data);
       return;
     }
 
-    const results = fuse.search(value);
-    const items = results.map((result) => result.item);
-    setSearchResults(items);
-  };
+    supabase
+      .from("preset_with_username")
+      .select("*")
+      .then(({ data: rows, error }) => {
+        if (!error && rows) setPresets(rows);
+      });
+  }, [data]);
 
   return (
     <div>
       <input
         type="text"
         onChange={handleSearch}
-        placeholder="Search presets..."
+        placeholder="Search..."
       />
       <ul>
         {searchResults.map((item, index) => (
-          <li
-            key={index}
-            onClick={() => onSelect && onSelect(item)}
-            style={{ cursor: onSelect ? 'pointer' : 'default' }}
-          >
-            {item.name} — {item.username}
-          </li>
+          <li key={index}>{item.name}</li>
         ))}
       </ul>
     </div>
   );
 }
-
 export default Search;
