@@ -12,6 +12,7 @@ export default defineConfig({
       '@homepage': path.resolve(__dirname, '../homepage/src'),
       '@audio': path.resolve(__dirname, '../audio'),
       '@search': path.resolve(__dirname, '../search'),
+      '@supabase/supabase-js': path.resolve(__dirname, 'node_modules/@supabase/supabase-js'),
       'fuse.js': path.resolve(__dirname, 'node_modules/fuse.js'),
       'react': path.resolve(__dirname, 'node_modules/react'),
       'react/jsx-runtime': path.resolve(__dirname, 'node_modules/react/jsx-runtime'),
