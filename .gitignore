@@ -12,3 +12,11 @@ TODO.md
 .DS_Store
 *.MP3
 *.mp3
+
+# Claude Code / Impeccable skills — local tooling only
+.claude/
+.cursor/
+.opencode/
+
+# Local session scratchpad (picks up across restarts, not for team)
+NEXTSTEPS.md
