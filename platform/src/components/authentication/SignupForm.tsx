@@ -31,26 +31,41 @@ const SignupForm = ({ setSignupSuccess }: { setSignupSuccess: (state: boolean) =
   };
 
   return (
-    <>
-      <form className="account-form" onSubmit={(e) => handleSignUp(e)}>
-        <h2>Sign Up for MAGE Platform!</h2>
-        <p>
-          Have an account? Login <Link to="/signin">here</Link>
+    <form className="account-form" onSubmit={handleSignUp} noValidate>
+      <h2>Create your MAGE account</h2>
+      <p>
+        Already registered? <Link to="/signin">Sign in</Link>
+      </p>
+      <div className="signup-input-container">
+        <input
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          placeholder="Email"
+          type="email"
+          autoComplete="email"
+          autoFocus
+          required
+          aria-label="Email"
+        />
+        <input
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          placeholder="Password"
+          type="password"
+          autoComplete="new-password"
+          required
+          aria-label="Password"
+        />
+        <button className="link-button" type="submit" disabled={loading}>
+          {loading ? "Creating account…" : "Sign Up"}
+        </button>
+      </div>
+      {error && (
+        <p className="form-error" role="alert">
+          {error}
         </p>
-        <div className="signup-input-container">
-          <input onChange={(e) => setEmail(e.target.value)} placeholder="Email" type="email" />
-          <input
-            onChange={(e) => setPassword(e.target.value)}
-            placeholder="Password"
-            type="password"
-          />
-          <button className="link-button" type="submit" disabled={loading}>
-            Sign Up
-          </button>
-        </div>
-      </form>
-      {error && <p>{error}</p>}
-    </>
+      )}
+    </form>
   );
 };
 
