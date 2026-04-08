@@ -6,6 +6,7 @@ import Explore from "./components/Explore";
 import Player from "./components/Player";
 import MyPresets from "./components/MyPresets";
 import Broadcast from "./components/Broadcast";
+import Profile from "./components/Profile";
 import SidebarLayout from "./components/SidebarLayout";
 import { AuthContextProvider } from "./context/AuthContext";
 // @ts-ignore — homepage's full app with Navbar + Routes (their code, untouched)
@@ -34,8 +35,9 @@ export const router = createBrowserRouter([
           </PrivateRoute>
         ),
         children: [
-          // TODO: Update Dashboard with a proper dashboard component.
-          { path: "/dashboard", element: <Player /> },
+          { path: "/profile", element: <Profile /> },
+          // Legacy /dashboard redirect — Profile replaced it
+          { path: "/dashboard", element: <Navigate to="/profile" replace /> },
           { path: "/explore", element: <Explore /> },
           { path: "/player", element: <Player /> },
           { path: "/my-presets", element: <MyPresets /> },
