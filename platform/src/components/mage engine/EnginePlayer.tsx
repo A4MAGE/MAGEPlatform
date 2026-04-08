@@ -29,16 +29,12 @@ function loadMageEngine(): Promise<any> {
 }
 
 type EnginePlayerProps = {
-  width?: string;
-  height?: string;
   preset?: string;
   displayControls?: boolean;
   audioSource?: string;
 };
 
 const EnginePlayer = ({
-  width = "500px",
-  height = "250px",
   displayControls = false,
   preset,
   audioSource,
@@ -100,27 +96,37 @@ const EnginePlayer = ({
   };
 
   return (
-    <div>
-      <div style={{ display: !engine ? "block" : "none", width, height }}>
-        <LoadingSpinner />
+    <div className="mage-engine">
+      <div className="mage-engine__frame">
+        {!engine && (
+          <div className="engine-player-loading">
+            <LoadingSpinner />
+          </div>
+        )}
+        <canvas
+          ref={canvasRef}
+          className="engine-player"
+          style={{ display: engine ? "block" : "none" }}
+        />
       </div>
-      <div style={{ display: engine ? "block" : "none", width, height }}>
-        <canvas ref={canvasRef} className="engine-player" />
+      <div className="mage-engine__controls">
+        <button
+          type="button"
+          className="mage-btn"
+          onClick={() => { engine?.play(); audioController?.play(); }}
+          disabled={!audioLoaded}
+        >
+          Play
+        </button>
+        <button
+          type="button"
+          className="mage-btn"
+          onClick={() => { engine?.pause?.(); audioController?.pause(); }}
+          disabled={!audioLoaded}
+        >
+          Pause
+        </button>
       </div>
-      <button
-        className="link-button"
-        onClick={() => { engine?.play(); audioController?.play(); }}
-        disabled={!audioLoaded}
-      >
-        Play
-      </button>
-      <button
-        className="link-button"
-        onClick={() => { engine?.pause?.(); audioController?.pause(); }}
-        disabled={!audioLoaded}
-      >
-        Pause
-      </button>
     </div>
   );
 };

@@ -1,6 +1,5 @@
 import { Link, useNavigate } from "react-router-dom";
 import { UserAuth } from "../../context/AuthContext";
-import "./AccountCreation.css";
 import { useState } from "react";
 
 const Signin = () => {
@@ -10,66 +9,95 @@ const Signin = () => {
   const [error, setError] = useState("");
 
   const navigate = useNavigate();
-
   const { signIn } = UserAuth();
 
-  const handleSignIn = async (e: any) => {
+  const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
-
     setLoading(true);
     try {
       const result = await signIn(email, password);
-
       if (result.success) {
         navigate("/profile");
-        setLoading(false);
       } else {
         throw new Error(result.data.message);
       }
-    } catch (error) {
-      setError(`${error}`);
+    } catch (err) {
+      setError(`${err}`);
+    } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="home-container">
-      <div className="content-center-card">
-        <form className="account-form" onSubmit={handleSignIn} noValidate>
-          <h2>Sign in to MAGE</h2>
-          <p>
-            Don't have an account? <Link to="/signup">Create one</Link>
+    <div className="mage-shell">
+      <div className="mage-split">
+        <div className="mage-split__brand">
+          <h1 className="mage-wordmark">MAGE</h1>
+          <p className="mage-tagline">
+            Musical Autonomous<br />
+            <strong>Generated Environments</strong>
           </p>
-          <div className="signup-input-container">
-            <input
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="Email"
-              type="email"
-              autoComplete="email"
-              autoFocus
-              required
-              aria-label="Email"
-            />
-            <input
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="Password"
-              type="password"
-              autoComplete="current-password"
-              required
-              aria-label="Password"
-            />
-            <button className="link-button" type="submit" disabled={loading}>
-              {loading ? "Signing in…" : "Sign In"}
+        </div>
+
+        <div className="mage-split__form">
+          <p className="mage-eyebrow">
+            <span className="mage-eyebrow__num">01</span>
+            Sign In
+          </p>
+
+          <form className="mage-form" onSubmit={handleSignIn} noValidate>
+            <div className="mage-field">
+              <label className="mage-field__label" htmlFor="signin-email">
+                <span className="mage-field__num">01</span>
+                Email
+              </label>
+              <input
+                id="signin-email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="you@domain.com"
+                autoComplete="email"
+                autoFocus
+                required
+              />
+            </div>
+
+            <div className="mage-field">
+              <label className="mage-field__label" htmlFor="signin-password">
+                <span className="mage-field__num">02</span>
+                Password
+              </label>
+              <input
+                id="signin-password"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="••••••••"
+                autoComplete="current-password"
+                required
+              />
+            </div>
+
+            {error && (
+              <p className="mage-error" role="alert">
+                {error}
+              </p>
+            )}
+
+            <button
+              type="submit"
+              className="mage-btn mage-btn--primary"
+              disabled={loading}
+            >
+              {loading ? "Signing in…" : "Enter"}
             </button>
-          </div>
-          {error && (
-            <p className="form-error" role="alert">
-              {error}
-            </p>
-          )}
-        </form>
+          </form>
+
+          <p className="mage-body">
+            First time here? <Link to="/signup" className="mage-link">Create an account</Link>
+          </p>
+        </div>
       </div>
     </div>
   );

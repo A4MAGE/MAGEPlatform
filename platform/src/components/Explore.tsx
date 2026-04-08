@@ -8,28 +8,38 @@ const Explore = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!supabase) { setLoading(false); return; }
-    supabase.from("preset_with_username").select("*").then(({ data, error }: { data: any; error: any }) => {
-      if (!error && data) setPresets(data);
+    if (!supabase) {
       setLoading(false);
-    });
+      return;
+    }
+    supabase
+      .from("preset_with_username")
+      .select("*")
+      .then(({ data, error }: { data: any; error: any }) => {
+        if (!error && data) setPresets(data);
+        setLoading(false);
+      });
   }, []);
 
-  if (loading) {
-    return (
-      <div className="home-container">
-        <div className="content-center-card">
-          <p>Loading presets...</p>
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div className="home-container">
-      <div className="content-center-card">
-        <h1>Explore</h1>
-        <Search data={presets} />
+    <div className="mage-page">
+      <header className="mage-page__header">
+        <div className="mage-page__title-group">
+          <p className="mage-eyebrow">
+            <span className="mage-eyebrow__num">02</span>
+            Explore
+          </p>
+          <h1 className="mage-title">Browse Presets</h1>
+        </div>
+        <p className="mage-body">
+          {loading ? "Loading…" : `${presets.length} total`}
+        </p>
+      </header>
+
+      <div className="mage-stack mage-stack--lg" style={{ maxWidth: "640px" }}>
+        <div className="mage-search">
+          <Search data={presets} />
+        </div>
       </div>
     </div>
   );

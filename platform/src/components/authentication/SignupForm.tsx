@@ -10,62 +10,83 @@ const SignupForm = ({ setSignupSuccess }: { setSignupSuccess: (state: boolean) =
 
   const { signUpNewUser } = UserAuth();
 
-  const handleSignUp = async (e: any) => {
+  const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
-
     setLoading(true);
     try {
       const result = await signUpNewUser(email, password);
-
       if (result.success) {
-        setLoading(false);
         setSignupSuccess(true);
       } else {
-        console.log(result.data);
         throw new Error(result.data.message);
       }
-    } catch (error) {
-      setError(`${error}`);
+    } catch (err) {
+      setError(`${err}`);
+    } finally {
       setLoading(false);
     }
   };
 
   return (
-    <form className="account-form" onSubmit={handleSignUp} noValidate>
-      <h2>Create your MAGE account</h2>
-      <p>
-        Already registered? <Link to="/signin">Sign in</Link>
+    <>
+      <p className="mage-eyebrow">
+        <span className="mage-eyebrow__num">01</span>
+        New Account
       </p>
-      <div className="signup-input-container">
-        <input
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          placeholder="Email"
-          type="email"
-          autoComplete="email"
-          autoFocus
-          required
-          aria-label="Email"
-        />
-        <input
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          placeholder="Password"
-          type="password"
-          autoComplete="new-password"
-          required
-          aria-label="Password"
-        />
-        <button className="link-button" type="submit" disabled={loading}>
-          {loading ? "Creating account…" : "Sign Up"}
+
+      <form className="mage-form" onSubmit={handleSignUp} noValidate>
+        <div className="mage-field">
+          <label className="mage-field__label" htmlFor="signup-email">
+            <span className="mage-field__num">01</span>
+            Email
+          </label>
+          <input
+            id="signup-email"
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="you@domain.com"
+            autoComplete="email"
+            autoFocus
+            required
+          />
+        </div>
+
+        <div className="mage-field">
+          <label className="mage-field__label" htmlFor="signup-password">
+            <span className="mage-field__num">02</span>
+            Password
+          </label>
+          <input
+            id="signup-password"
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder="Choose a strong password"
+            autoComplete="new-password"
+            required
+          />
+        </div>
+
+        {error && (
+          <p className="mage-error" role="alert">
+            {error}
+          </p>
+        )}
+
+        <button
+          type="submit"
+          className="mage-btn mage-btn--primary"
+          disabled={loading}
+        >
+          {loading ? "Creating…" : "Create Account"}
         </button>
-      </div>
-      {error && (
-        <p className="form-error" role="alert">
-          {error}
-        </p>
-      )}
-    </form>
+      </form>
+
+      <p className="mage-body">
+        Already have one? <Link to="/signin" className="mage-link">Sign in</Link>
+      </p>
+    </>
   );
 };
 

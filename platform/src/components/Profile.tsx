@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { UserAuth } from "../context/AuthContext";
 import { supabase } from "../supabaseClient";
-import "./Profile.css";
 
 type Preset = {
   id: number;
@@ -38,38 +37,62 @@ const Profile = () => {
   const presetCount = presets.length;
 
   return (
-    <div className="dashboard-container">
-      <div className="content-center-card profile-card">
-        <h1>Profile</h1>
-        <p className="profile-username">{username}</p>
-        <p className="profile-email">{email}</p>
-        <p className="profile-stat">
-          {presetCount} preset{presetCount === 1 ? "" : "s"}
-        </p>
+    <div className="mage-page">
+      <header className="mage-page__header">
+        <div className="mage-page__title-group">
+          <p className="mage-eyebrow">
+            <span className="mage-eyebrow__num">01</span>
+            Profile
+          </p>
+          <h1 className="mage-title">Account</h1>
+        </div>
         <button
-          className="link-button profile-signout"
-          onClick={signOut}
           type="button"
+          className="mage-btn mage-btn--quiet"
+          onClick={signOut}
         >
           Sign Out
         </button>
-      </div>
+      </header>
 
-      <div className="content-center-card profile-presets">
-        <h2>My Presets</h2>
-        {loading ? (
-          <p className="profile-presets-empty">Loading…</p>
-        ) : presetCount === 0 ? (
-          <p className="profile-presets-empty">
-            No presets yet. Create one from the Player page.
+      <div className="mage-grid-2">
+        <div className="mage-stack mage-stack--lg">
+          <div className="mage-identity">
+            <h2 className="mage-identity__name">{username}</h2>
+            <p className="mage-identity__email">{email}</p>
+          </div>
+          <div>
+            <p className="mage-eyebrow">
+              <span className="mage-eyebrow__num">{presetCount.toString().padStart(2, "0")}</span>
+              Presets Created
+            </p>
+          </div>
+        </div>
+
+        <div className="mage-stack">
+          <p className="mage-eyebrow">
+            <span className="mage-eyebrow__num">02</span>
+            My Presets
           </p>
-        ) : (
-          <ul className="profile-presets-list">
-            {presets.map((p) => (
-              <li key={p.id}>{p.name}</li>
-            ))}
-          </ul>
-        )}
+          {loading ? (
+            <p className="mage-preset-list__empty">Loading…</p>
+          ) : presetCount === 0 ? (
+            <p className="mage-preset-list__empty">
+              No presets yet. Create one from the Player page.
+            </p>
+          ) : (
+            <ul className="mage-preset-list">
+              {presets.map((p, i) => (
+                <li key={p.id}>
+                  <span className="mage-preset-list__num">
+                    {(i + 1).toString().padStart(2, "0")}
+                  </span>
+                  <span>{p.name}</span>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
       </div>
     </div>
   );

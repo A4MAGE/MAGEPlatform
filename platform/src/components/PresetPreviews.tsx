@@ -20,7 +20,6 @@ const PresetPreviews = ({ onSelect }: { onSelect: (preset: object) => void }) =>
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Get default preset data from public folder.
   useEffect(() => {
     const fetchPresets = async () => {
       try {
@@ -42,33 +41,36 @@ const PresetPreviews = ({ onSelect }: { onSelect: (preset: object) => void }) =>
     fetchPresets();
   }, []);
 
-  if (loading)
+  if (loading) {
     return (
-      <div className="preset-previews">
-        <p>Loading presets...</p>
+      <div className="mage-rail">
+        <p className="mage-rail__label">Loading…</p>
       </div>
     );
-  if (error)
+  }
+  if (error) {
     return (
-      <div className="preset-previews">
-        <p>Error: {error}</p>
+      <div className="mage-rail">
+        <p className="mage-rail__label">Error</p>
       </div>
     );
+  }
 
   return (
-    <div className="preset-previews">
-      <p>This is a Debug Preset selector</p>
+    <div className="mage-rail">
+      <p className="mage-rail__label">Debug Presets</p>
       {presets.map((preset, index) => (
-        <div key={index}>
-          <button
-            className="link-button"
-            onClick={() => {
-              onSelect(preset);
-            }}
-          >
-            Preset {index}
-          </button>
-        </div>
+        <button
+          key={index}
+          type="button"
+          className="mage-rail__item"
+          onClick={() => onSelect(preset)}
+        >
+          <span className="mage-rail__num">
+            {(index + 1).toString().padStart(2, "0")}
+          </span>
+          <span>Preset {index}</span>
+        </button>
       ))}
     </div>
   );

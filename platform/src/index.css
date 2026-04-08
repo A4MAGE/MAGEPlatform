@@ -1,5 +1,6 @@
 @import "../../homepage/src/index.css";
 @import "../../homepage/src/App.css";
+@import "./mage-ui.css";
 
 :root {
   color-scheme: dark;

@@ -4,7 +4,6 @@ import PresetPreviews from "./PresetPreviews";
 import { useEffect, useRef, useState } from "react";
 // @ts-ignore
 import Search from "@search/search-bar-main";
-import "./Player.css";
 
 const Player = () => {
   const { session, signOut } = UserAuth();
@@ -42,44 +41,76 @@ const Player = () => {
   };
 
   return (
-    <div className="dashboard-container">
-      <div className="content-center-card player-card">
-        <h1>Player</h1>
-        <p className="player-welcome">Signed in as {session?.user?.email}</p>
-
-        {/*  @ts-ignore */}
-        <Search onSelect={handlePresetSelect} />
-
-        <div className="player-divider" />
-
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept="audio/*"
-          style={{ display: "none" }}
-          onChange={handleAudioFileChange}
-          aria-label="Pick audio file"
-        />
+    <div className="mage-page">
+      <header className="mage-page__header">
+        <div className="mage-page__title-group">
+          <p className="mage-eyebrow">
+            <span className="mage-eyebrow__num">03</span>
+            Player
+          </p>
+          <h1 className="mage-title">{session?.user?.email}</h1>
+        </div>
         <button
           type="button"
-          className="player-audio-button"
-          onClick={() => fileInputRef.current?.click()}
+          className="mage-btn mage-btn--quiet"
+          onClick={signOut}
         >
-          <span className="player-audio-label">
-            {audioFileName ? "Audio file" : "Audio"}
-          </span>
-          <span className="player-audio-filename">
-            {audioFileName || "Pick an audio file…"}
-          </span>
-        </button>
-
-        <EnginePlayer preset={preset} audioSource={audioSource} />
-
-        <button type="button" className="player-signout" onClick={signOut}>
           Sign Out
         </button>
+      </header>
+
+      <div className="mage-grid-player">
+        <div className="mage-stack mage-stack--lg">
+          <div className="mage-stack">
+            <p className="mage-eyebrow">
+              <span className="mage-eyebrow__num">01</span>
+              Search Presets
+            </p>
+            <div className="mage-search">
+              {/* @ts-ignore */}
+              <Search onSelect={handlePresetSelect} />
+            </div>
+          </div>
+
+          <div className="mage-stack">
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="audio/*"
+              style={{ display: "none" }}
+              onChange={handleAudioFileChange}
+              aria-label="Pick audio file"
+            />
+            <button
+              type="button"
+              className="mage-audio-picker"
+              onClick={() => fileInputRef.current?.click()}
+            >
+              <span className="mage-audio-picker__label">Audio Source</span>
+              <span
+                className={
+                  "mage-audio-picker__name" +
+                  (audioFileName ? "" : " mage-audio-picker__name--empty")
+                }
+              >
+                {audioFileName || "No file selected — click to choose"}
+              </span>
+            </button>
+          </div>
+
+          <div className="mage-stack">
+            <p className="mage-eyebrow">
+              <span className="mage-eyebrow__num">02</span>
+              Output
+            </p>
+            <EnginePlayer preset={preset} audioSource={audioSource} />
+          </div>
+        </div>
+
+        <div className="mage-stack">
+          <PresetPreviews onSelect={handlePresetSelect} />
+        </div>
       </div>
-      <PresetPreviews onSelect={handlePresetSelect} />
     </div>
   );
 };

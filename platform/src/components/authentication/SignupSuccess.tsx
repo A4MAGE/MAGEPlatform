@@ -3,10 +3,14 @@ import { Link } from "react-router-dom";
 const SignupSuccess = () => {
   return (
     <>
-      <h1>Sign Up Successful!</h1>
-      <p>
-        Please verify your email using the link provided, then login{" "}
-        <Link to="/signin">here!</Link>
+      <p className="mage-eyebrow">
+        <span className="mage-eyebrow__num">02</span>
+        Account Created
+      </p>
+      <h2 className="mage-title">Check your inbox</h2>
+      <p className="mage-body">
+        We sent a verification link to your email. Once you confirm, you can{" "}
+        <Link to="/signin" className="mage-link">sign in</Link>.
       </p>
     </>
   );
