@@ -9,7 +9,7 @@ const Explore = () => {
 
   useEffect(() => {
     if (!supabase) { setLoading(false); return; }
-    supabase.from("preset").select("*").then(({ data, error }: { data: any; error: any }) => {
+    supabase.from("preset_with_username").select("*").then(({ data, error }: { data: any; error: any }) => {
       if (!error && data) setPresets(data);
       setLoading(false);
     });
