@@ -4,7 +4,7 @@ import MageLogo from "@homepage/assets/favicon.svg";
 import "./Sidebar.css";
 
 const tabs = [
-  { path: "/dashboard", label: "Dashboard", icon: "⊞" },
+  { path: "/profile", label: "Profile", icon: "◈" },
   { path: "/explore", label: "Explore", icon: "◎" },
   { path: "/player", label: "Player", icon: "▶" },
   { path: "/my-presets", label: "My Presets", icon: "♫" },

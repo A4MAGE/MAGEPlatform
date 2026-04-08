@@ -12,3 +12,16 @@ TODO.md
 .DS_Store
 *.MP3
 *.mp3
+
+# Env files — never commit secrets
+.env
+.env.*
+!.env.example
+
+# Claude Code / Impeccable skills — local tooling only
+.claude/
+.cursor/
+.opencode/
+
+# Local session scratchpad (picks up across restarts, not for team)
+NEXTSTEPS.md

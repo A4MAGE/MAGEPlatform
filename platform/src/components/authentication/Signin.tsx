@@ -21,7 +21,7 @@ const Signin = () => {
       const result = await signIn(email, password);
 
       if (result.success) {
-        navigate("/dashboard");
+        navigate("/profile");
         setLoading(false);
       } else {
         throw new Error(result.data.message);
@@ -35,24 +35,41 @@ const Signin = () => {
   return (
     <div className="home-container">
       <div className="content-center-card">
-        <form className="account-form" onSubmit={(e) => handleSignIn(e)}>
-          <h2>Sign into the MAGE Platform!</h2>
+        <form className="account-form" onSubmit={handleSignIn} noValidate>
+          <h2>Sign in to MAGE</h2>
           <p>
-            Don't have an account? Register <Link to="/signup">here</Link>
+            Don't have an account? <Link to="/signup">Create one</Link>
           </p>
           <div className="signup-input-container">
-            <input onChange={(e) => setEmail(e.target.value)} placeholder="Email" type="email" />
             <input
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="Email"
+              type="email"
+              autoComplete="email"
+              autoFocus
+              required
+              aria-label="Email"
+            />
+            <input
+              value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="Password"
               type="password"
+              autoComplete="current-password"
+              required
+              aria-label="Password"
             />
             <button className="link-button" type="submit" disabled={loading}>
-              Sign In
+              {loading ? "Signing in…" : "Sign In"}
             </button>
           </div>
+          {error && (
+            <p className="form-error" role="alert">
+              {error}
+            </p>
+          )}
         </form>
-        {error && <p>{error}</p>}
       </div>
     </div>
   );
