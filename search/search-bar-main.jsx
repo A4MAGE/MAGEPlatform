@@ -17,12 +17,12 @@ function Search({ data, onSelect }) {
     includeScore: true,
     includeMatches: true,
     threshold: 0.2,
-    keys: ["username", "name", "tag"],
+    keys: ["username", "name", "description"],
   };
 
   useEffect(() => {
     if (data) {
-      setFuse(new Fuse(rows, options));
+      setFuse(new Fuse(data, options));
       return;
     }
 
