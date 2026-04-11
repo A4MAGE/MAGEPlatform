@@ -18,7 +18,7 @@ function Navbar() {
       if (!el) return null
       const obs = new IntersectionObserver(
         ([entry]) => { if (entry.isIntersecting) setActive(id) },
-        { threshold: 0.5 }
+        { rootMargin: '-40% 0px -40% 0px', threshold: 0 }
       )
       obs.observe(el)
       return obs
