@@ -34,7 +34,7 @@
   display: flex;
   justify-content: center;
   margin: 0;
-  margin-top: 200px;
+  margin-top: 80px;
 
   /* Glow */ 
   text-shadow: 0 0 10px var(--fontcolor), 0 0 20px var(--fontcolor), 0 0 40px var(--fontcolor); 
@@ -416,6 +416,12 @@
   right: 20px;
 }
 
+.nav-corner a {
+  text-decoration: none;
+  display: block;
+  line-height: 0;
+}
+
 .mage-icon-img {
   width: 36px;
   height: auto;
@@ -486,7 +492,7 @@
 #home, #explore {
   min-height: 100vh;
   padding: 80px 0;
-  margin-bottom: 100px;
+  margin-bottom: 20px;
 }
 
 #engine {
@@ -576,7 +582,7 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 80px 2rem 60px;
+  padding: 80px 2rem 80px;
   gap: 1.5rem;
 }
 

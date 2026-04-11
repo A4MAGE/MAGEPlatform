@@ -42,31 +42,6 @@ body::before {
   100% { filter: hue-rotate(360deg); }
 }
 
-body::after {
-  content: '';
-  position: fixed;
-  inset: 0;
-  z-index: 9999;
-  pointer-events: none;
-  opacity: 0.12;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg' width%3D'200' height%3D'200'%3E%3Cfilter id%3D'n'%3E%3CfeTurbulence type%3D'fractalNoise' baseFrequency%3D'0.75' numOctaves%3D'4' stitchTiles%3D'stitch'%2F%3E%3CfeColorMatrix type%3D'saturate' values%3D'0'%2F%3E%3C%2Ffilter%3E%3Crect width%3D'200' height%3D'200' filter%3D'url(%23n)'%2F%3E%3C%2Fsvg%3E");
-  background-size: 200px 200px;
-  animation: grain 0.4s steps(1) infinite;
-}
-
-@keyframes grain {
-  0%   { background-position:   0px    0px; }
-  10%  { background-position: -50px -100px; }
-  20%  { background-position: -150px  50px; }
-  30%  { background-position:  70px -250px; }
-  40%  { background-position: -50px  250px; }
-  50%  { background-position: -150px 100px; }
-  60%  { background-position: 150px    0px; }
-  70%  { background-position:   0px  150px; }
-  80%  { background-position:  30px  350px; }
-  90%  { background-position: -100px 100px; }
-  100% { background-position:   0px    0px; }
-}
 
 @keyframes orbit {
   0%   { transform: translate(0%, 0%);        background: radial-gradient(circle at center, var(--grdcol2) 0%, transparent 70%);}

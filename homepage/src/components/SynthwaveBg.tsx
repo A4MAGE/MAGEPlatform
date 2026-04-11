@@ -32,9 +32,6 @@ function SynthwaveBg() {
         </mask>
       </defs>
 
-      {/* Horizon line */}
-      <line x1="-200" y1={VP.y} x2="1200" y2={VP.y} stroke="white" strokeWidth="1.2" opacity="0.55" />
-
       <g mask="url(#gridMask)" stroke="white" strokeWidth="0.7" fill="none">
         {H_LINES.map((y, i) => (
           <line key={`h${i}`} x1="-200" y1={y} x2="1200" y2={y} />
