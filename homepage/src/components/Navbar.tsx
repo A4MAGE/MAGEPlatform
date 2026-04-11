@@ -48,7 +48,9 @@ function Navbar() {
     <>
       {/* Logo — top left */}
       <div className="nav-corner nav-corner--left">
-        <Link to="/"><img src={Icon} className="mage-icon-img" /></Link>
+        <a onClick={() => goToSection('home')} style={{ cursor: 'pointer' }}>
+          <img src={Icon} className="mage-icon-img" />
+        </a>
       </div>
 
       {/* Nav links — centered pill */}
