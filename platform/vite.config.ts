@@ -26,7 +26,19 @@ export default defineConfig({
     },
   },
   build: {
-    minify: 'esbuild',
+    // shader-park (inside mage) builds GLSL via eval() on strings that
+    // reference identifiers like `input`, `sdBox`, `time`. esbuild's
+    // minifier mangles local variable names, which breaks those eval'd
+    // lookups — works in dev, ReferenceError in production build.
+    // terser with mangle:false preserves names but still removes dead code
+    // and whitespace, so the bundle stays small and shader-park survives.
+    minify: 'terser',
+    terserOptions: {
+      mangle: false,
+    },
+  },
+  optimizeDeps: {
+    exclude: ['mage'],
   },
   server: {
     fs: {
