@@ -8,23 +8,33 @@ const MyPresets = () => {
   const userID = session?.user?.id;
 
   useEffect(() => {
-    if (userID) {
-      const fetchPresets = async () => {
-        const { data, error } = await supabase
-          .from("preset")
-          .select("*")
-          .eq("user_id", userID);
-        if (!error && data) setPresets(data);
-      };
-      fetchPresets();
-    }
+    const db = supabase;
+    if (!db || !userID) return;
+    const fetchPresets = async () => {
+      // Query the view, not the base table — `user_id` lives on
+      // preset_with_username (joined with users), not on preset itself.
+      const { data, error } = await db
+        .from("preset_with_username")
+        .select("*")
+        .eq("user_id", userID);
+      if (error) {
+        console.error("MyPresets fetch failed:", error);
+        return;
+      }
+      setPresets(data ?? []);
+    };
+    fetchPresets();
   }, [userID]);
 
   const handleDelete = async (id: number) => {
+    if (!supabase) return;
+    // Delete from the base table — views are not deletable.
     const { error } = await supabase.from("preset").delete().eq("id", id);
-    if (!error) {
-      setPresets(prev => prev.filter((p) => p.id !== id));
+    if (error) {
+      console.error("MyPresets delete failed:", error);
+      return;
     }
+    setPresets(prev => prev.filter((p) => p.id !== id));
   };
 
   return (
