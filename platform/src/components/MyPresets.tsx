@@ -5,20 +5,20 @@ import { useEffect, useState } from "react";
 const MyPresets = () => {
   const [presets, setPresets] = useState<any[]>([]);
   const { session } = UserAuth();
-  const userEmail = session?.user?.email;
+  const userID = session?.user?.id;
 
   useEffect(() => {
-    if (userEmail) {
+    if (userID) {
       const fetchPresets = async () => {
         const { data, error } = await supabase
           .from("preset")
           .select("*")
-          .eq("author", userEmail);
+          .eq("user_id", userID);
         if (!error && data) setPresets(data);
       };
       fetchPresets();
     }
-  }, [userEmail]);
+  }, [userID]);
 
   const handleDelete = async (id: number) => {
     const { error } = await supabase.from("preset").delete().eq("id", id);
