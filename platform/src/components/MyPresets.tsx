@@ -4,26 +4,30 @@ import { useEffect, useState } from "react";
 
 const MyPresets = () => {
   const [presets, setPresets] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
   const { session } = UserAuth();
   const userID = session?.user?.id;
 
   useEffect(() => {
-    const db = supabase;
-    if (!db || !userID) return;
-    const fetchPresets = async () => {
-      // Query the view, not the base table — `user_id` lives on
-      // preset_with_username (joined with users), not on preset itself.
-      const { data, error } = await db
-        .from("preset_with_username")
+    if (!supabase) return;
+    if (!userID) {
+      setLoading(false);
+      return;
+    }
+    setLoading(true);
+    (async () => {
+      const { data, error } = await supabase
+        .from("preset")
         .select("*")
         .eq("user_id", userID);
       if (error) {
-        console.error("MyPresets fetch failed:", error);
-        return;
+        console.error("MyPresets fetch failed:", error, "userID=", userID);
+      } else {
+        console.log(`MyPresets: fetched ${data?.length ?? 0} for user ${userID}`);
+        setPresets(data ?? []);
       }
-      setPresets(data ?? []);
-    };
-    fetchPresets();
+      setLoading(false);
+    })();
   }, [userID]);
 
   const handleDelete = async (id: number) => {
@@ -49,7 +53,15 @@ const MyPresets = () => {
       </header>
 
       <div className="mage-stack mage-stack--lg">
-        {presets.length > 0 ? (
+        {loading ? (
+          <div className="mage-panel">
+            <p className="mage-preset-list__empty">Loading presets…</p>
+          </div>
+        ) : !userID ? (
+          <div className="mage-panel">
+            <p className="mage-preset-list__empty">Please sign in to see your presets.</p>
+          </div>
+        ) : presets.length > 0 ? (
           <ul className="mage-preset-list">
             {presets.map((p, index) => (
               <li key={p.id} className="mage-preset-item">
