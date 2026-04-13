@@ -16,7 +16,7 @@ const Profile = () => {
   const [loading, setLoading] = useState(true);
 
   const userId = session?.user?.id;
-  const email = session?.user?.email ?? "guest";
+  const email = session?.user?.email;
 
   useEffect(() => {
     if (!supabase || !userId) {
