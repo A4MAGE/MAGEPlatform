@@ -4,8 +4,14 @@ import PresetPreviews from "./PresetPreviews";
 import { useEffect, useRef, useState } from "react";
 // @ts-ignore
 import Search from "@search/search-bar-main";
+import type { MAGEEngineAPI } from "mage";
 
-const Player = () => {
+type PlayerProps = {
+  displayControls?: boolean,
+  setCreatePresetEngineRef?: (engine: MAGEEngineAPI | null) => void;
+};
+
+const Player = ({ displayControls = false, setCreatePresetEngineRef }: PlayerProps) => {
   const { session, signOut } = UserAuth();
   const [preset, setPreset] = useState<any>("");
   const [audioSource, setAudioSource] = useState("");
@@ -41,7 +47,8 @@ const Player = () => {
   };
 
   return (
-    <div className="mage-page">
+    // Don't apply mage-page class if displayControls is true - this means player is being used as a child component in Create.tsx which has a mage-page div.
+    <div className={displayControls ? "" : "mage-page"}>
       <header className="mage-page__header">
         <div className="mage-page__title-group">
           <p className="mage-eyebrow">
@@ -50,11 +57,7 @@ const Player = () => {
           </p>
           <h1 className="mage-title">{session?.user?.email}</h1>
         </div>
-        <button
-          type="button"
-          className="mage-btn mage-btn--quiet"
-          onClick={signOut}
-        >
+        <button type="button" className="mage-btn mage-btn--quiet" onClick={signOut}>
           Sign Out
         </button>
       </header>
@@ -103,7 +106,12 @@ const Player = () => {
               <span className="mage-eyebrow__num">02</span>
               Output
             </p>
-            <EnginePlayer preset={preset} audioSource={audioSource} />
+            <EnginePlayer
+              preset={preset}
+              audioSource={audioSource}
+              displayControls={displayControls}
+              setCreatePresetEngineRef={setCreatePresetEngineRef}
+            />
           </div>
         </div>
 

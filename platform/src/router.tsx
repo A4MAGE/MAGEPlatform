@@ -9,6 +9,7 @@ import Broadcast from "./components/Broadcast";
 import Profile from "./components/Profile";
 import SidebarLayout from "./components/SidebarLayout";
 import { AuthContextProvider } from "./context/AuthContext";
+import Create from "./components/Create";
 // @ts-ignore — homepage's full app with Navbar + Routes (their code, untouched)
 import HomepageApp from "@homepage/App";
 
@@ -42,6 +43,7 @@ export const router = createBrowserRouter([
           { path: "/player", element: <Player /> },
           { path: "/my-presets", element: <MyPresets /> },
           { path: "/broadcast", element: <Broadcast /> },
+          { path: "/create", element: <Create/>}
         ],
       },
 

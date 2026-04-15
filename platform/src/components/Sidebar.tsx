@@ -9,6 +9,7 @@ const tabs = [
   { path: "/player", label: "Player", icon: "▶" },
   { path: "/my-presets", label: "My Presets", icon: "♫" },
   { path: "/broadcast", label: "Broadcast", icon: "◉" },
+  { path: "/create", label: "Create", icon: "+"},
 ];
 
 type SidebarProps = {

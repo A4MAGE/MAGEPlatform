@@ -9,11 +9,12 @@ import "./engine.css";
 
 type EnginePlayerProps = {
   preset?: string;
-  displayControls?: boolean;
   audioSource?: string;
+  displayControls?: boolean;
+  setCreatePresetEngineRef?: (engine: MAGEEngineAPI | null) => void;
 };
 
-const EnginePlayer = ({ displayControls = false, preset, audioSource }: EnginePlayerProps) => {
+const EnginePlayer = ({ preset, audioSource, displayControls = false, setCreatePresetEngineRef}: EnginePlayerProps) => {
   const canvasRef = useRef(null);
   const [engine, setEngine] = useState<MAGEEngineAPI | null>(null);
   const [audioController, setAudioController] = useState<any>(null);
@@ -60,6 +61,12 @@ const EnginePlayer = ({ displayControls = false, preset, audioSource }: EnginePl
   useEffect(() => {
     if (preset) loadPreset(preset);
   }, [preset]);
+
+  useEffect(() => {
+    if (setCreatePresetEngineRef) {
+      setCreatePresetEngineRef(engine);
+    }
+  }, [engine]);
 
   const loadPreset = async (preset: any) => {
     if (!engine) return;
