@@ -22,7 +22,6 @@ export default defineConfig({
       'embla-carousel-react': path.resolve(__dirname, 'node_modules/embla-carousel-react'),
       '@fontsource/michroma': path.resolve(__dirname, 'node_modules/@fontsource/michroma'),
       '@fontsource/anta': path.resolve(__dirname, 'node_modules/@fontsource/anta'),
-      'mage': path.resolve(__dirname, 'node_modules/mage/dist/mage-engine.js'), // Fix for errors with importing MAGE engine from file.
     },
   },
   build: {
@@ -60,9 +59,6 @@ export default defineConfig({
         collapse_vars: false,
       },
     },
-  },
-  optimizeDeps: {
-    exclude: ['mage'],
   },
   server: {
     fs: {

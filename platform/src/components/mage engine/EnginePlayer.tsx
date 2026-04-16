@@ -4,7 +4,7 @@ import AudioEngine from "@audio/AudioEngine";
 // @ts-ignore
 import AudioController from "@audio/AudioController";
 import LoadingSpinner from "../LoadingSpinner";
-import { initMAGE, type MAGEEngineAPI } from "mage";
+import { initMAGE, type MAGEEngineAPI } from "@notrac/mage";
 import "./engine.css";
 
 type EnginePlayerProps = {
@@ -27,7 +27,7 @@ const EnginePlayer = ({ displayControls = false, preset, audioSource }: EnginePl
 
     const mageEngine = initMAGE({
       canvas: canvasRef.current,
-      withControls: displayControls,
+      withControls: {active: displayControls, integrated: false},
       autoStart: true,
     });
     setEngine(mageEngine);
