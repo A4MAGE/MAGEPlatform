@@ -1,8 +1,4 @@
 import { useEffect, useRef, useState } from "react";
-// @ts-ignore
-import AudioEngine from "@audio/AudioEngine";
-// @ts-ignore
-import AudioController from "@audio/AudioController";
 import LoadingSpinner from "../LoadingSpinner";
 import { initMAGE, type MAGEEngineAPI } from "@notrac/mage";
 import "./engine.css";
@@ -16,7 +12,7 @@ type EnginePlayerProps = {
 const EnginePlayer = ({ displayControls = false, preset, audioSource }: EnginePlayerProps) => {
   const canvasRef = useRef(null);
   const [engine, setEngine] = useState<MAGEEngineAPI | null>(null);
-  const [audioController, setAudioController] = useState<any>(null);
+  const [audioController] = useState<any>(null);
   const [audioLoaded, setAudioLoaded] = useState(false);
 
   useEffect(() => {
@@ -32,9 +28,7 @@ const EnginePlayer = ({ displayControls = false, preset, audioSource }: EnginePl
     });
     setEngine(mageEngine);
 
-    const ae = new AudioEngine();
-    const ac = new AudioController(ae);
-    setAudioController(ac);
+
 
     if (audioSource) {
       mageEngine.loadAudio(audioSource);
@@ -53,6 +47,7 @@ const EnginePlayer = ({ displayControls = false, preset, audioSource }: EnginePl
       engine.loadAudio(audioSource);
       audioController.loadFromUrl(audioSource);
       // TODO: Audio bugged right now and doesn't report when loaded
+      if(engine.isAudioLoaded())
       setAudioLoaded(true);
     }
   }, [audioSource]);
