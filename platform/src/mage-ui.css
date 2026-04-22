@@ -799,6 +799,31 @@
   background: var(--mage-cream-10);
 }
 
+.mage-save-row {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.mage-save-row .mage-input {
+  flex: 1;
+}
+
+.mage-save-msg {
+  margin-top: 0.4rem;
+  font-size: 0.8rem;
+  color: var(--mage-cream-60, var(--mage-cream));
+}
+
+.mage-preset-thumb {
+  width: 48px;
+  height: 48px;
+  object-fit: cover;
+  border-radius: var(--mage-radius-sm);
+  margin-right: 0.6rem;
+  background: var(--mage-cream-05);
+}
+
 .mage-btn--tiny {
   font-size: 0.65rem !important;
   padding: 0.3rem 0.65rem !important;

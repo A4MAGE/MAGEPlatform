@@ -7,11 +7,11 @@ type EnginePlayerProps = {
   preset?: string | object | null;
   displayControls?: boolean;
   audioSource?: string;
+  onEngineReady?: (engine: MAGEEngineAPI) => void;
 };
 
-const EnginePlayer = ({ displayControls = false, preset, audioSource }: EnginePlayerProps) => {
+const EnginePlayer = ({ displayControls = false, preset, audioSource, onEngineReady }: EnginePlayerProps) => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const engineRef = useRef<MAGEEngineAPI | null>(null);
   const [engine, setEngine] = useState<MAGEEngineAPI | null>(null);
   const [audioLoaded, setAudioLoaded] = useState(false);
 
@@ -20,14 +20,13 @@ const EnginePlayer = ({ displayControls = false, preset, audioSource }: EnginePl
 
     const mageEngine = initMAGE({
       canvas: canvasRef.current,
-      withControls: {active: displayControls, integrated: false},
+      withControls: { active: displayControls, integrated: false },
       autoStart: true,
     });
-    engineRef.current = mageEngine;
     setEngine(mageEngine);
+    onEngineReady?.(mageEngine);
 
     return () => {
-      engineRef.current = null;
       mageEngine.dispose();
     };
   }, []);
