@@ -7,7 +7,7 @@ import Search from "@search/search-bar-main";
 
 const Player = () => {
   const { session, signOut } = UserAuth();
-  const [preset, setPreset] = useState<any>("");
+  const [preset, setPreset] = useState<string | object | null>(null);
   const [audioSource, setAudioSource] = useState("");
   const [audioFileName, setAudioFileName] = useState("");
   const fileInputRef = useRef<HTMLInputElement | null>(null);
