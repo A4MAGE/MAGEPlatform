@@ -67,28 +67,35 @@ const EnginePlayer = ({ displayControls = false, preset, audioSource, onEngineRe
       <div className="mage-engine__controls">
         <button
           type="button"
-          className="mage-btn"
+          className="mage-btn mage-btn--icon"
+          aria-label="Play"
           onClick={() => engine?.play()}
           disabled={!audioLoaded}
         >
-          Play
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <polygon points="5 3 19 12 5 21 5 3" />
+          </svg>
         </button>
         <button
           type="button"
-          className="mage-btn"
+          className="mage-btn mage-btn--icon"
+          aria-label="Pause"
           onClick={() => engine?.pause()}
           disabled={!audioLoaded}
         >
-          Pause
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <rect x="6" y="4" width="4" height="16" rx="1" />
+            <rect x="14" y="4" width="4" height="16" rx="1" />
+          </svg>
         </button>
         <button
           type="button"
-          className="mage-btn mage-btn--fullscreen"
+          className="mage-btn--icon-ghost"
           aria-label="Toggle fullscreen"
           onClick={() => engine?.toggleFullscreen()}
           disabled={!engine}
         >
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
             <polyline points="15 3 21 3 21 9" />
             <polyline points="9 21 3 21 3 15" />
             <line x1="21" y1="3" x2="14" y2="10" />
