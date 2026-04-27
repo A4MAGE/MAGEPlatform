@@ -634,6 +634,15 @@
   flex: 1;
 }
 
+.mage-engine__controls .mage-btn--fullscreen {
+  flex: 0 0 auto;
+  width: auto;
+  padding: 0 0.75rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .mage-audio-picker {
   display: flex;
   flex-direction: column;
