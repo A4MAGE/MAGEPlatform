@@ -9,7 +9,7 @@ type ProfileRow = {
 };
 
 const Profile = () => {
-  const { session, signOut } = UserAuth();
+  const { session } = UserAuth();
   const userId = session?.user?.id;
   const email = session?.user?.email ?? "";
   const createdAt = session?.user?.created_at;
@@ -236,13 +236,6 @@ const Profile = () => {
 
           {error && <p className="mage-profile__error">{error}</p>}
 
-          <button
-            type="button"
-            className="mage-btn mage-btn--quiet mage-profile__signout"
-            onClick={signOut}
-          >
-            Sign Out
-          </button>
         </div>
       )}
     </div>

@@ -23,7 +23,7 @@ type PlayerProps = {
 };
 
 const Player = ({ displayControls = false }: PlayerProps) => {
-  const { session, signOut } = UserAuth();
+  const { session } = UserAuth();
   const [preset, setPreset] = useState<string | object | null>(null);
   const [audioSource, setAudioSource] = useState("");
   const [audioFileName, setAudioFileName] = useState("");
@@ -131,9 +131,6 @@ const Player = ({ displayControls = false }: PlayerProps) => {
           </p>
           <h1 className="mage-title">{session?.user?.email}</h1>
         </div>
-        <button type="button" className="mage-btn mage-btn--quiet" onClick={signOut}>
-          Sign Out
-        </button>
       </header>
 
       <div className="mage-grid-player">
