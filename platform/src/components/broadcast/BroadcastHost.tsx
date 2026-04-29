@@ -17,8 +17,8 @@ const BroadcastHost = () => {
   const [presets, setPresets] = useState<Preset[]>([]);
   const [activePreset, setActivePreset] = useState<Preset | null>(null);
   const [audioFileName, setAudioFileName] = useState("");
+  const [audioUploading, setAudioUploading] = useState(false);
   const [loadedAudioUrl, setLoadedAudioUrl] = useState<string | undefined>(undefined);
-  const [viewerAudioUrl, setViewerAudioUrl] = useState("");
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const blobUrlRef = useRef<string | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -146,26 +146,35 @@ const BroadcastHost = () => {
     }
   };
 
-  const handleAudioFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleAudioFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (!file) return;
+    if (!file || !supabase || !roomId) return;
+
+    // Play locally via blob URL immediately so host doesn't wait for upload
     if (blobUrlRef.current) URL.revokeObjectURL(blobUrlRef.current);
     const blobUrl = URL.createObjectURL(file);
     blobUrlRef.current = blobUrl;
     setAudioFileName(file.name);
     setLoadedAudioUrl(blobUrl);
-  };
 
-  const handleShareAudio = () => {
-    const url = viewerAudioUrl.trim();
-    if (!url) return;
-    publishRef.current?.({ type: "audio", audioUrl: url });
-    if (supabase && roomId) {
-      supabase
-        .from("broadcast_room")
-        .update({ current_audio_url: url, updated_at: new Date().toISOString() })
-        .eq("id", roomId);
-    }
+    // Upload to Supabase Storage so viewers get the same public URL
+    setAudioUploading(true);
+    const path = `${roomId}/${Date.now()}-${file.name}`;
+    const { data, error: uploadError } = await supabase.storage
+      .from("broadcast-audio")
+      .upload(path, file, { upsert: true });
+
+    setAudioUploading(false);
+    if (uploadError || !data) return;
+
+    const { data: urlData } = supabase.storage.from("broadcast-audio").getPublicUrl(data.path);
+    const publicUrl = urlData.publicUrl;
+
+    publishRef.current?.({ type: "audio", audioUrl: publicUrl });
+    supabase
+      .from("broadcast_room")
+      .update({ current_audio_url: publicUrl, updated_at: new Date().toISOString() })
+      .eq("id", roomId);
   };
 
   const handlePlay = () => {
@@ -260,27 +269,16 @@ const BroadcastHost = () => {
                 <button
                   type="button"
                   className="mage-audio-picker"
-                  style={{ width: "100%", marginBottom: "10px" }}
+                  style={{ width: "100%" }}
                   onClick={() => fileInputRef.current?.click()}
+                  disabled={audioUploading}
                 >
-                  <span className="mage-audio-picker__label">Audio File</span>
-                  <span className={"mage-audio-picker__name" + (audioFileName ? "" : " mage-audio-picker__name--empty")}>
-                    {audioFileName || "No file selected — click to choose"}
+                  <span className="mage-audio-picker__label">
+                    {audioUploading ? "Uploading…" : "Audio File"}
                   </span>
-                </button>
-                <p className="mage-body" style={{ fontSize: "11px", color: "var(--mage-muted, #888)", marginBottom: "6px" }}>
-                  Viewer audio URL (public link)
-                </p>
-                <input
-                  type="text"
-                  className="mage-input"
-                  placeholder="https://… (for viewers)"
-                  value={viewerAudioUrl}
-                  onChange={(e) => setViewerAudioUrl(e.target.value)}
-                  style={{ width: "100%", marginBottom: "6px" }}
-                />
-                <button type="button" className="mage-btn" onClick={handleShareAudio} style={{ width: "100%" }}>
-                  Share Audio with Viewers
+                  <span className={"mage-audio-picker__name" + (audioFileName ? "" : " mage-audio-picker__name--empty")}>
+                    {audioUploading ? "Sharing with viewers…" : (audioFileName || "No file selected — click to choose")}
+                  </span>
                 </button>
               </div>
 
