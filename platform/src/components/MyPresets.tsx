@@ -79,7 +79,7 @@ const MyPresets = () => {
 
   return (
     <main className="mage-page">
-      <header className="mage-page__header">
+      <header className="mage-page__header" style={{alignItems: "center"}}>
         <div className="mage-page__title-group">
           <p className="mage-eyebrow">
             <span className="mage-eyebrow__num">{presets.length}</span> Presets Saved
