@@ -12,7 +12,7 @@ type RoomState = {
   is_active: boolean;
 };
 
-const DRIFT_THRESHOLD = 0.5; // seconds
+const DRIFT_THRESHOLD = 0.2; // seconds
 
 const BroadcastViewer = () => {
   const { roomId } = useParams<{ roomId: string }>();
@@ -26,6 +26,8 @@ const BroadcastViewer = () => {
 
   const engineRef = useRef<MAGEEngineAPI | null>(null);
   const closeChannelRef = useRef<CloseFn | null>(null);
+  const pendingPlayRef = useRef<{ play: boolean; time: number } | null>(null);
+  const pendingPlayIntervalRef = useRef<number | null>(null);
 
   // Fetch initial room state
   useEffect(() => {
@@ -60,12 +62,31 @@ const BroadcastViewer = () => {
         const eng = engineRef.current;
         if (!eng) return;
         if (msg.playing) {
-          eng.play();
-          const localTime = eng.getAudioTime();
-          if (Math.abs(localTime - msg.currentTime) > DRIFT_THRESHOLD) {
-            eng.seek(msg.currentTime);
+          if (eng.isAudioLoaded()) {
+            const localTime = eng.getAudioTime();
+            if (Math.abs(localTime - msg.currentTime) > DRIFT_THRESHOLD) eng.seek(msg.currentTime);
+            eng.play();
+          } else {
+            // Audio still loading — queue and retry every 100ms until ready
+            pendingPlayRef.current = { play: true, time: msg.currentTime };
+            if (!pendingPlayIntervalRef.current) {
+              pendingPlayIntervalRef.current = window.setInterval(() => {
+                const e = engineRef.current;
+                const pending = pendingPlayRef.current;
+                if (!e || !pending) { window.clearInterval(pendingPlayIntervalRef.current!); pendingPlayIntervalRef.current = null; return; }
+                if (e.isAudioLoaded()) {
+                  if (Math.abs(e.getAudioTime() - pending.time) > DRIFT_THRESHOLD) e.seek(pending.time);
+                  e.play();
+                  pendingPlayRef.current = null;
+                  window.clearInterval(pendingPlayIntervalRef.current!);
+                  pendingPlayIntervalRef.current = null;
+                }
+              }, 100);
+            }
           }
         } else {
+          pendingPlayRef.current = null;
+          if (pendingPlayIntervalRef.current) { window.clearInterval(pendingPlayIntervalRef.current); pendingPlayIntervalRef.current = null; }
           eng.pause();
         }
       } else if (msg.type === "end") {
@@ -75,7 +96,10 @@ const BroadcastViewer = () => {
     };
 
     closeChannelRef.current = openViewerChannel(roomId, handleMessage);
-    return () => closeChannelRef.current?.();
+    return () => {
+      closeChannelRef.current?.();
+      if (pendingPlayIntervalRef.current) { window.clearInterval(pendingPlayIntervalRef.current); pendingPlayIntervalRef.current = null; }
+    };
   }, [roomId, loading, ended, notFound]);
 
   if (loading) return <div className="mage-page"><p className="mage-body">Joining room…</p></div>;

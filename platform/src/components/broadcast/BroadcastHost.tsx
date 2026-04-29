@@ -84,7 +84,7 @@ const BroadcastHost = () => {
         playing: true,
         currentTime: engine.getAudioTime(),
       });
-    }, 2000);
+    }, 500);
 
     return () => {
       if (playbackIntervalRef.current) window.clearInterval(playbackIntervalRef.current);
