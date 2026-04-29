@@ -225,21 +225,44 @@ const Player = ({ displayControls = false }: PlayerProps) => {
               onChange={handleAudioFileChange}
               aria-label="Pick audio file"
             />
-            <button
-              type="button"
-              className="mage-audio-picker"
-              onClick={() => fileInputRef.current?.click()}
-            >
-              <span className="mage-audio-picker__label">↑ Upload Audio</span>
-              <span
-                className={
-                  "mage-audio-picker__name" +
-                  (audioFileName ? "" : " mage-audio-picker__name--empty")
-                }
+            <div style={{ display: "flex", gap: "0.75rem", alignItems: "center" }}>
+              <button
+                type="button"
+                className="mage-audio-picker"
+                onClick={() => fileInputRef.current?.click()}
+                style={{ flex: 1 }}
               >
-                {audioFileName || "No file chosen"}
-              </span>
-            </button>
+                <span className="mage-audio-picker__label">↑ Upload Audio</span>
+                <span
+                  className={
+                    "mage-audio-picker__name" +
+                    (audioFileName ? "" : " mage-audio-picker__name--empty")
+                  }
+                >
+                  {audioFileName || "No file chosen"}
+                </span>
+              </button>
+              <div className="mage-save-row" style={{ flex: 1 }}>
+                <input
+                  type="text"
+                  className="mage-input"
+                  placeholder="Name this preset…"
+                  value={presetName}
+                  onChange={(e) => setPresetName(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && handleSave()}
+                  disabled={saving}
+                />
+                <button
+                  type="button"
+                  className="mage-btn mage-btn--primary mage-save-row__btn"
+                  onClick={handleSave}
+                  disabled={saving || !session?.user?.id}
+                >
+                  {saving ? "Saving…" : "Save"}
+                </button>
+              </div>
+            </div>
+            {saveMsg && <p className="mage-save-msg">{saveMsg}</p>}
           </div>
 
           <div className="mage-stack" ref={outputRef}>
@@ -268,28 +291,6 @@ const Player = ({ displayControls = false }: PlayerProps) => {
             </div>
           </div>
 
-          <div className="mage-stack">
-            <div className="mage-save-row">
-              <input
-                type="text"
-                className="mage-input"
-                placeholder="Name this preset and save it…"
-                value={presetName}
-                onChange={(e) => setPresetName(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && handleSave()}
-                disabled={saving}
-              />
-              <button
-                type="button"
-                className="mage-btn mage-btn--primary mage-save-row__btn"
-                onClick={handleSave}
-                disabled={saving || !session?.user?.id}
-              >
-                {saving ? "Saving…" : "Save"}
-              </button>
-            </div>
-            {saveMsg && <p className="mage-save-msg">{saveMsg}</p>}
-          </div>
         </div>
 
         <div className="mage-stack">
