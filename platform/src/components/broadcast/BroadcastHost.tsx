@@ -179,8 +179,8 @@ const BroadcastHost = () => {
                 readOnly
               />
               <div className="mage-engine__controls" style={{ marginTop: "8px" }}>
-                <button type="button" className="mage-btn" onClick={handlePlay} disabled={!engine}>Play</button>
-                <button type="button" className="mage-btn" onClick={handlePause} disabled={!engine}>Pause</button>
+                <button type="button" className="mage-btn mage-btn--primary" onClick={handlePlay} disabled={!engine}>Play</button>
+                <button type="button" className="mage-btn mage-btn--primary" onClick={handlePause} disabled={!engine}>Pause</button>
               </div>
             </div>
 
