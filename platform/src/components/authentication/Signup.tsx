@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import SignupForm from "./SignupForm";
 import SignupSuccess from "./SignupSuccess";
 // @ts-ignore — shared homepage components
@@ -11,6 +12,8 @@ import "@homepage/App.css";
 
 const Signup = () => {
   const [signupSuccess, setSignupSuccess] = useState(false);
+  const [searchParams] = useSearchParams();
+  const next = searchParams.get("next") ?? "";
 
   return (
     <>
@@ -28,7 +31,7 @@ const Signup = () => {
 
         <div className="mage-split__form">
           {signupSuccess ? (
-            <SignupSuccess />
+            <SignupSuccess next={next} />
           ) : (
             <SignupForm setSignupSuccess={setSignupSuccess} />
           )}

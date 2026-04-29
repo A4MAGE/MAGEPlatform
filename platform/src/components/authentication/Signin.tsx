@@ -102,7 +102,7 @@ const Signin = () => {
           </form>
 
           <p className="mage-body">
-            First time here? <Link to="/signup" className="mage-link">Create an account</Link>
+            First time here? <Link to={searchParams.get("next") ? `/signup?next=${encodeURIComponent(searchParams.get("next")!)}` : "/signup"} className="mage-link">Create an account</Link>
           </p>
         </div>
       </div>

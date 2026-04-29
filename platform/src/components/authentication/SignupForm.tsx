@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { useState } from "react";
 import { UserAuth } from "../../context/AuthContext";
 
@@ -7,6 +7,8 @@ const SignupForm = ({ setSignupSuccess }: { setSignupSuccess: (state: boolean) =
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [searchParams] = useSearchParams();
+  const next = searchParams.get("next") ?? "";
 
   const { signUpNewUser } = UserAuth();
 
@@ -79,7 +81,7 @@ const SignupForm = ({ setSignupSuccess }: { setSignupSuccess: (state: boolean) =
       </form>
 
       <p className="mage-body">
-        Already have one? <Link to="/signin" className="mage-link">Sign in</Link>
+        Already have one? <Link to={next ? `/signin?next=${encodeURIComponent(next)}` : "/signin"} className="mage-link">Sign in</Link>
       </p>
     </>
   );

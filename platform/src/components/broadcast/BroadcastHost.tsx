@@ -22,13 +22,17 @@ const BroadcastHost = () => {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const blobUrlRef = useRef<string | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [roomTitle, setRoomTitle] = useState("");
   const [initialized, setInitialized] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const publishRef = useRef<PublishFn | null>(null);
   const closeChannelRef = useRef<CloseFn | null>(null);
   const playbackIntervalRef = useRef<number | null>(null);
+
+  // Revoke blob URL on unmount
+  useEffect(() => {
+    return () => { if (blobUrlRef.current) URL.revokeObjectURL(blobUrlRef.current); };
+  }, []);
 
   // Load user's presets
   useEffect(() => {
@@ -46,18 +50,14 @@ const BroadcastHost = () => {
   useEffect(() => {
     if (!supabase || !session?.user || !roomId) return;
 
+    let active = true;
     const defaultTitle = `${session.user.email?.split("@")[0]}'s room`;
-    setRoomTitle(defaultTitle);
 
     supabase
       .from("broadcast_room")
-      .upsert({
-        id: roomId,
-        host_user_id: session.user.id,
-        title: defaultTitle,
-        is_active: true,
-      }, { onConflict: "id" })
+      .upsert({ id: roomId, host_user_id: session.user.id, title: defaultTitle, is_active: true }, { onConflict: "id" })
       .then(({ error: e }: { error: any }) => {
+        if (!active) return;
         if (e) { setError(`Could not create room: ${e.message}`); return; }
         const { publish, close } = openHostChannel(roomId);
         publishRef.current = publish;
@@ -66,6 +66,7 @@ const BroadcastHost = () => {
       });
 
     return () => {
+      active = false;
       stopBroadcast(false);
     };
   }, [roomId, session]);
