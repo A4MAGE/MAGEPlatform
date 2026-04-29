@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, useBlocker } from "react-router-dom";
 import { supabase } from "../../supabaseClient";
 import { UserAuth } from "../../context/AuthContext";
 import EnginePlayer from "../mage engine/EnginePlayer";
@@ -87,6 +87,39 @@ const BroadcastHost = () => {
       if (playbackIntervalRef.current) window.clearInterval(playbackIntervalRef.current);
     };
   }, [isPlaying, engine]);
+
+  // Block in-app navigation away from the host page while live
+  useBlocker(
+    ({ currentLocation, nextLocation }) =>
+      initialized &&
+      currentLocation.pathname !== nextLocation.pathname &&
+      !window.confirm("You're still live. Leaving will stop the broadcast — are you sure?")
+  );
+
+  // Reconnect Supabase channel when tab becomes visible again (browser throttles background WS)
+  useEffect(() => {
+    if (!initialized || !roomId) return;
+    const handleVisibility = () => {
+      if (document.visibilityState === "visible" && !closeChannelRef.current) {
+        const { publish, close } = openHostChannel(roomId);
+        publishRef.current = publish;
+        closeChannelRef.current = close;
+      }
+    };
+    document.addEventListener("visibilitychange", handleVisibility);
+    return () => document.removeEventListener("visibilitychange", handleVisibility);
+  }, [initialized, roomId]);
+
+  // Warn on browser tab close / reload
+  useEffect(() => {
+    if (!initialized) return;
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      e.preventDefault();
+      e.returnValue = "";
+    };
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
+  }, [initialized]);
 
   const stopBroadcast = (navigate_away = true) => {
     if (playbackIntervalRef.current) window.clearInterval(playbackIntervalRef.current);
