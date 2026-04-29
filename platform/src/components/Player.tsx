@@ -24,12 +24,22 @@ type PlayerProps = {
 
 const Player = ({ displayControls = false }: PlayerProps) => {
   const { session } = UserAuth();
+  // Data related to the current preset being displayed on the screen.
   const [preset, setPreset] = useState<string | object | null>(null);
   const [audioSource, setAudioSource] = useState("");
   const [audioFileName, setAudioFileName] = useState("");
+  const [currentPresetName, setCurrentPresetName] = useState("");
+  const [currentPresetDesc, setCurrentPresetDesc] = useState("");
+  const [currentPresetAuthor, setCurrentPresetAuthor] = useState("");
+  const [currentPresetId, setCurrentPresetId] = useState("");
+  const [shareMsg, setShareMsg] = useState<string | null>(null);
+
+  // Data for saving preset to user account
   const [presetName, setPresetName] = useState("");
   const [saving, setSaving] = useState(false);
   const [saveMsg, setSaveMsg] = useState<string | null>(null);
+
+  // References for changing audio files.
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const blobUrlRef = useRef<string | null>(null);
   const engineRef = useRef<MAGEEngineAPI | null>(null);
@@ -43,8 +53,16 @@ const Player = ({ displayControls = false }: PlayerProps) => {
   const handlePresetSelect = (item: any) => {
     if (item.scene_data) {
       setPreset(item.scene_data);
+      setCurrentPresetName(item.name);
+      setCurrentPresetDesc(item.description);
+      setCurrentPresetAuthor(item.username);
+      setCurrentPresetId(item.id);
     } else {
       setPreset(item);
+      setCurrentPresetName("");
+      setCurrentPresetDesc("");
+      setCurrentPresetAuthor("");
+      setCurrentPresetId("");
     }
     if (item.audioSource) setAudioSource(item.audioSource);
   };
@@ -59,6 +77,23 @@ const Player = ({ displayControls = false }: PlayerProps) => {
 
     setAudioFileName(file.name);
     setAudioSource(blobUrl);
+  };
+
+  const shareLink = currentPresetId ? `https://a4mage.github.io/player/${currentPresetId}` : "";
+
+  const handleCopyShareLink = async () => {
+    if (!shareLink) {
+      setShareMsg("Select a preset first.");
+      return;
+    }
+
+    try {
+      await navigator.clipboard.writeText(shareLink);
+      setShareMsg("Share link copied.");
+    } catch (err) {
+      console.error("Copy share link failed:", err);
+      setShareMsg("Could not copy share link.");
+    }
   };
 
   const handleSave = async () => {
@@ -183,6 +218,30 @@ const Player = ({ displayControls = false }: PlayerProps) => {
               displayControls={displayControls}
               onEngineReady={(e) => (engineRef.current = e)}
             />
+            <div className="mage-preset-meta">
+              <div className="mage-preset-meta__details">
+                {currentPresetName && (
+                  <div className="mage-preset-meta__name">{currentPresetName}</div>
+                )}
+                {currentPresetAuthor && (
+                  <div className="mage-preset-meta__author">Created by {currentPresetAuthor}</div>
+                )}
+                {currentPresetDesc && (
+                  <div className="mage-preset-meta__desc">{currentPresetDesc}</div>
+                )}
+              </div>
+              <div className="mage-preset-meta__share">
+                <button
+                  type="button"
+                  className="mage-btn mage-btn--ghost mage-btn--tiny"
+                  onClick={handleCopyShareLink}
+                  disabled={!shareLink}
+                >
+                  Copy Share Link
+                </button>
+                {shareMsg && <div className="mage-preset-meta__msg">{shareMsg}</div>}
+              </div>
+            </div>
           </div>
 
           <div className="mage-stack">
