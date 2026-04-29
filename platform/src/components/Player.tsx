@@ -56,13 +56,11 @@ const Player = ({ displayControls = false }: PlayerProps) => {
     };
   }, []);
 
-  const autoCaptureThumbnail = async (item: any) => {
+  const captureThumbnailForItem = async (item: any) => {
     const engine = engineRef.current;
-    if (!engine || !supabase || !item.id || item.thumbnail_url) return;
+    if (!engine?.captureThumbnail || !supabase || !item.id || !item.scene_data) return;
     try {
-      await new Promise((r) => setTimeout(r, 2000));
-      const exported = engine.toPreset();
-      const dataUrl = engine.captureThumbnail ? await engine.captureThumbnail(exported) : null;
+      const dataUrl = await engine.captureThumbnail(item.scene_data);
       if (!dataUrl) return;
       const blob = dataUrlToBlob(dataUrl);
       const path = `${item.id}.png`;
@@ -77,6 +75,25 @@ const Player = ({ displayControls = false }: PlayerProps) => {
     } catch (_) {}
   };
 
+  // When the engine becomes ready, batch-generate thumbnails for any preset missing one.
+  const batchThumbnailDone = useRef(false);
+  const onEngineReady = (e: MAGEEngineAPI) => {
+    engineRef.current = e;
+    if (batchThumbnailDone.current || !supabase || !e.captureThumbnail) return;
+    batchThumbnailDone.current = true;
+    supabase
+      .from("preset_with_username")
+      .select("*")
+      .is("thumbnail_url", null)
+      .then(async ({ data, error }: { data: any; error: any }) => {
+        if (error || !data?.length) return;
+        for (const item of data) {
+          await captureThumbnailForItem(item);
+          await new Promise((r) => setTimeout(r, 300));
+        }
+      });
+  };
+
   const handlePresetSelect = (item: any) => {
     if (item.scene_data) {
       setPreset(item.scene_data);
@@ -84,7 +101,7 @@ const Player = ({ displayControls = false }: PlayerProps) => {
       setCurrentPresetDesc(item.description);
       setCurrentPresetAuthor(item.username);
       setCurrentPresetId(item.id);
-      if (!item.thumbnail_url) autoCaptureThumbnail(item);
+      if (!item.thumbnail_url) captureThumbnailForItem(item);
       setTimeout(() => outputRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 50);
     } else {
       setPreset(item);
@@ -239,7 +256,7 @@ const Player = ({ displayControls = false }: PlayerProps) => {
               preset={preset}
               audioSource={audioSource}
               displayControls={displayControls}
-              onEngineReady={(e) => (engineRef.current = e)}
+              onEngineReady={onEngineReady}
             />
             <div className="mage-preset-meta">
               <div className="mage-preset-meta__details">
