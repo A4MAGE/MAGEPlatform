@@ -18,6 +18,19 @@ const EnginePlayer = ({ displayControls = false, preset, audioSource, onEngineRe
   useEffect(() => {
     if (!canvasRef.current) return;
 
+    // TODO: Remove this when this bug is patched in MAGE engine that causes crashing on mac
+    // Workaround for a @notrac/mage non-Windows initialization bug where
+    // switchControls() expects an element with id="ui_hide" to exist.
+    let shimHideButton: HTMLButtonElement | null = null;
+    if (!document.getElementById("ui_hide")) {
+      shimHideButton = document.createElement("button");
+      shimHideButton.id = "ui_hide";
+      shimHideButton.type = "button";
+      shimHideButton.setAttribute("data-mage-shim", "true");
+      shimHideButton.style.display = "none";
+      document.body.appendChild(shimHideButton);
+    }
+
     const mageEngine = initMAGE({
       canvas: canvasRef.current,
       withControls: { active: displayControls, integrated: false },
@@ -28,6 +41,9 @@ const EnginePlayer = ({ displayControls = false, preset, audioSource, onEngineRe
 
     return () => {
       mageEngine.dispose();
+      if (shimHideButton?.parentNode) {
+        shimHideButton.parentNode.removeChild(shimHideButton);
+      }
     };
   }, []);
 
