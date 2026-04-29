@@ -2,6 +2,7 @@ import { UserAuth } from "../context/AuthContext";
 import EnginePlayer from "./mage engine/EnginePlayer";
 import PresetPreviews from "./PresetPreviews";
 import { useEffect, useRef, useState } from "react";
+import { useLocation } from "react-router-dom";
 import { supabase } from "../supabaseClient";
 import type { MAGEEngineAPI } from "@notrac/mage";
 // @ts-ignore
@@ -24,14 +25,18 @@ type PlayerProps = {
 
 const Player = ({ displayControls = false }: PlayerProps) => {
   const { session } = UserAuth();
+  const location = useLocation();
+  const navPreset = (location.state as any)?.preset ?? null;
   // Data related to the current preset being displayed on the screen.
-  const [preset, setPreset] = useState<string | object | null>(null);
+  const [preset, setPreset] = useState<string | object | null>(
+    navPreset?.scene_data ?? null
+  );
   const [audioSource, setAudioSource] = useState("");
   const [audioFileName, setAudioFileName] = useState("");
-  const [currentPresetName, setCurrentPresetName] = useState("");
-  const [currentPresetDesc, setCurrentPresetDesc] = useState("");
-  const [currentPresetAuthor, setCurrentPresetAuthor] = useState("");
-  const [currentPresetId, setCurrentPresetId] = useState("");
+  const [currentPresetName, setCurrentPresetName] = useState(navPreset?.name ?? "");
+  const [currentPresetDesc, setCurrentPresetDesc] = useState(navPreset?.description ?? "");
+  const [currentPresetAuthor, setCurrentPresetAuthor] = useState(navPreset?.username ?? "");
+  const [currentPresetId, setCurrentPresetId] = useState(navPreset?.id ?? "");
   const [shareMsg, setShareMsg] = useState<string | null>(null);
 
   // Data for saving preset to user account

@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "../supabaseClient";
 // @ts-ignore
 import Search from "@search/search-bar-main";
@@ -6,6 +7,7 @@ import Search from "@search/search-bar-main";
 const Explore = () => {
   const [presets, setPresets] = useState([]);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (!supabase) {
@@ -20,6 +22,10 @@ const Explore = () => {
         setLoading(false);
       });
   }, []);
+
+  const handleSelect = (item: any) => {
+    navigate("/player", { state: { preset: item } });
+  };
 
   return (
     <div className="mage-page">
@@ -37,7 +43,7 @@ const Explore = () => {
       </header>
 
       <div className="mage-search">
-        <Search data={presets} />
+        <Search data={presets} onSelect={handleSelect} />
       </div>
     </div>
   );
