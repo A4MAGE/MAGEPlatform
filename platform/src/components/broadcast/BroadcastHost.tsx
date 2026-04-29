@@ -47,12 +47,12 @@ const BroadcastHost = () => {
 
     supabase
       .from("broadcast_room")
-      .insert({
+      .upsert({
         id: roomId,
         host_user_id: session.user.id,
         title: defaultTitle,
         is_active: true,
-      })
+      }, { onConflict: "id" })
       .then(({ error: e }: { error: any }) => {
         if (e) { setError(`Could not create room: ${e.message}`); return; }
         const { publish, close } = openHostChannel(roomId);
