@@ -466,24 +466,59 @@
 .mage-search ul {
   list-style: none;
   padding: 0;
-  margin: 0;
+  margin: 0.5rem 0 0;
   display: flex;
   flex-direction: column;
   gap: 0;
 }
 
 .mage-search ul li {
-  padding: 0.7rem 0;
-  color: var(--mage-cream);
-  font-size: 0.88rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.55rem 0.5rem;
   border-bottom: 1px solid var(--mage-cream-05);
+  border-radius: 6px;
   cursor: pointer;
-  transition: color 0.2s ease, padding-left 0.2s ease;
+  transition: background 0.15s ease;
+  text-align: left;
 }
 
 .mage-search ul li:hover {
-  color: var(--mage-mint);
-  padding-left: 0.5rem;
+  background: var(--mage-cream-05);
+}
+
+.search-result__thumb {
+  width: 44px;
+  height: 44px;
+  border-radius: 4px;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.search-result__thumb--empty {
+  background: var(--mage-cream-10);
+}
+
+.search-result__meta {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  min-width: 0;
+}
+
+.search-result__name {
+  font-size: 0.88rem;
+  font-weight: 500;
+  color: var(--mage-cream);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.search-result__author {
+  font-size: 0.75rem;
+  color: var(--mage-cream-60);
 }
 
 /* ---------- preset rail (player debug list) ---------- */
