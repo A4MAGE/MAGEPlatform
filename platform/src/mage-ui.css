@@ -426,6 +426,102 @@
   margin: 0;
 }
 
+/* ---------- Explore page ---------- */
+
+.mage-explore-search {
+  margin-bottom: 2rem;
+}
+
+.mage-explore-search__input {
+  width: 100%;
+  max-width: 560px;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid var(--mage-cream-20);
+  padding: 0.65rem 0;
+  font-family: var(--mage-font-body);
+  font-size: 1rem;
+  color: var(--mage-cream);
+  outline: none;
+  caret-color: var(--mage-mint);
+  transition: border-color 0.2s ease;
+}
+
+.mage-explore-search__input::placeholder {
+  color: var(--mage-cream-40);
+}
+
+.mage-explore-search__input:focus {
+  border-bottom-color: var(--mage-mint);
+}
+
+.mage-explore-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 1.25rem;
+}
+
+.mage-explore-card {
+  display: flex;
+  flex-direction: column;
+  background: var(--mage-cream-05);
+  border: 1px solid var(--mage-cream-10);
+  border-radius: 8px;
+  overflow: hidden;
+  cursor: pointer;
+  text-align: left;
+  transition: border-color 0.2s ease, transform 0.15s ease;
+  padding: 0;
+  font-family: var(--mage-font-body);
+  color: var(--mage-cream);
+}
+
+.mage-explore-card:hover {
+  border-color: var(--mage-mint-60);
+  transform: translateY(-2px);
+}
+
+.mage-explore-card__thumb {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  overflow: hidden;
+}
+
+.mage-explore-card__thumb img,
+.mage-explore-card__thumb-placeholder {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.mage-explore-card__info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  padding: 0.65rem 0.75rem;
+}
+
+.mage-explore-card__name {
+  font-size: 0.88rem;
+  font-weight: 500;
+  color: var(--mage-cream);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.mage-explore-card__author {
+  font-size: 0.75rem;
+  color: var(--mage-cream-60);
+}
+
+.mage-explore-empty {
+  color: var(--mage-cream-40);
+  font-size: 0.9rem;
+  margin-top: 2rem;
+}
+
 /* ---------- search bar wrapper (for search-bar-main.jsx which
    we don't edit directly — scope styling via parent class) ---------- */
 
