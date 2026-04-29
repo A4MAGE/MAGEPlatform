@@ -176,6 +176,7 @@ const BroadcastHost = () => {
                 audioSource={audioUrl || undefined}
                 onEngineReady={setEngine}
                 displayControls={false}
+                readOnly
               />
               <div className="mage-engine__controls" style={{ marginTop: "8px" }}>
                 <button type="button" className="mage-btn" onClick={handlePlay} disabled={!engine}>Play</button>
