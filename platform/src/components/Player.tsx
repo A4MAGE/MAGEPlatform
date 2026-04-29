@@ -43,6 +43,7 @@ const Player = ({ displayControls = false }: PlayerProps) => {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const blobUrlRef = useRef<string | null>(null);
   const engineRef = useRef<MAGEEngineAPI | null>(null);
+  const outputRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     return () => {
@@ -79,6 +80,7 @@ const Player = ({ displayControls = false }: PlayerProps) => {
       setCurrentPresetAuthor(item.username);
       setCurrentPresetId(item.id);
       if (!item.thumbnail_url) autoCaptureThumbnail(item);
+      setTimeout(() => outputRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 50);
     } else {
       setPreset(item);
       setCurrentPresetName("");
@@ -223,7 +225,7 @@ const Player = ({ displayControls = false }: PlayerProps) => {
             </button>
           </div>
 
-          <div className="mage-stack">
+          <div className="mage-stack" ref={outputRef}>
             <p className="mage-eyebrow">
               <span className="mage-eyebrow__num">02</span>
               Output
