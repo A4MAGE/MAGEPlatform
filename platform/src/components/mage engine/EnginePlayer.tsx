@@ -35,7 +35,7 @@ const EnginePlayer = ({ displayControls = false, preset, audioSource, onEngineRe
     const mageEngine = initMAGE({
       canvas: canvasRef.current,
       withControls: { active: displayControls, integrated: false },
-      autoStart: true,
+      autoStart: !readOnly,
     });
     setEngine(mageEngine);
     onEngineReady?.(mageEngine);

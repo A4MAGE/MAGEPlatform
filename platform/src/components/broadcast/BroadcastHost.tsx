@@ -38,12 +38,14 @@ const BroadcastHost = () => {
 
   const pushState = (overrides: Partial<{ playing: boolean; playbackTime: number }> = {}) => {
     if (!roomId) return;
-    publishState(roomId, {
+    const state = {
       presetData: activePresetRef.current?.scene_data ?? null,
       audioUrl: publicAudioUrlRef.current,
       playing: overrides.playing ?? isPlayingRef.current,
       playbackTime: overrides.playbackTime ?? engineRef.current?.getAudioTime() ?? 0,
-    });
+    };
+    console.log("[Host] pushState →", { hasPreset: !!state.presetData, audioUrl: state.audioUrl, playing: state.playing, playbackTime: state.playbackTime });
+    publishState(roomId, state);
   };
 
   // Load user presets
@@ -110,6 +112,8 @@ const BroadcastHost = () => {
     const file = e.target.files?.[0];
     if (!file || !supabase || !roomId) return;
 
+    console.log("[Host] audio file selected:", file.name, "size:", file.size);
+
     if (blobUrlRef.current) URL.revokeObjectURL(blobUrlRef.current);
     const blob = URL.createObjectURL(file);
     blobUrlRef.current = blob;
@@ -118,13 +122,19 @@ const BroadcastHost = () => {
 
     setAudioUploading(true);
     const path = `${roomId}/${Date.now()}-${file.name}`;
+    console.log("[Host] uploading to path:", path);
     const { data, error } = await supabase.storage.from("broadcast-audio").upload(path, file, { upsert: true });
     setAudioUploading(false);
-    if (error || !data) { console.error("Upload failed:", error?.message); return; }
+    if (error || !data) {
+      console.error("[Host] upload FAILED:", error?.message, error);
+      return;
+    }
 
+    console.log("[Host] upload SUCCESS, data.path:", data.path);
     const { data: urlData } = supabase.storage.from("broadcast-audio").getPublicUrl(data.path);
     publicAudioUrlRef.current = urlData.publicUrl;
-    pushState(); // immediately push new audio URL to viewers
+    console.log("[Host] public URL:", urlData.publicUrl);
+    pushState();
   };
 
   const handlePlay = () => {
