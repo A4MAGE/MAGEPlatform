@@ -242,35 +242,10 @@ const BroadcastHost = () => {
           <p className="mage-eyebrow"><span className="mage-eyebrow__num">05</span>Broadcast</p>
           <h1 className="mage-title">You're Live</h1>
         </div>
-        <button type="button" className="mage-btn mage-btn--quiet" onClick={() => stopBroadcast(true)}
-          style={{ background: "rgba(192,57,43,0.15)", border: "1px solid rgba(192,57,43,0.5)", color: "#e74c3c", flexShrink: 0, width: "auto", padding: "0.4rem 1rem", fontSize: "0.82rem" }}>
-          Stop Broadcasting
-        </button>
       </header>
 
       {initialized && (
         <>
-          <div style={{ marginBottom: "16px" }}>
-            <p className="mage-body" style={{ fontSize: "12px", color: "var(--mage-muted, #888)" }}>
-              Share this link with viewers:
-            </p>
-            <code
-              style={{
-                background: "var(--mage-surface-2, #222)",
-                padding: "6px 10px",
-                borderRadius: "4px",
-                fontSize: "13px",
-                wordBreak: "break-all",
-                display: "block",
-                cursor: "pointer",
-              }}
-              onClick={() => navigator.clipboard.writeText(shareUrl)}
-              title="Click to copy"
-            >
-              {shareUrl}
-            </code>
-          </div>
-
           <div style={{ display: "grid", gridTemplateColumns: "1fr 280px", gap: "24px" }}>
             {/* Engine */}
             <div>
@@ -318,11 +293,13 @@ const BroadcastHost = () => {
                   disabled={audioUploading}
                 >
                   <span className="mage-audio-picker__label">
-                    {audioUploading ? "Uploading…" : "Audio File"}
+                    {audioUploading ? "Uploading…" : "↑ Audio"}
                   </span>
-                  <span className={"mage-audio-picker__name" + (audioFileName ? "" : " mage-audio-picker__name--empty")}>
-                    {audioUploading ? "Sharing with viewers…" : (audioFileName || "No file selected — click to choose")}
-                  </span>
+                  {audioFileName && (
+                    <span className="mage-audio-picker__name">
+                      {audioUploading ? "Sharing…" : audioFileName}
+                    </span>
+                  )}
                 </button>
               </div>
 
@@ -351,6 +328,44 @@ const BroadcastHost = () => {
                 )}
               </div>
             </div>
+          </div>
+
+          {/* Share link + Stop — bottom of page */}
+          <div style={{ marginTop: "24px", display: "flex", alignItems: "center", gap: "12px" }}>
+            <code
+              style={{
+                flex: 1,
+                background: "var(--mage-cream-05)",
+                border: "1px solid var(--mage-cream-10)",
+                padding: "6px 10px",
+                borderRadius: "4px",
+                fontSize: "12px",
+                wordBreak: "break-all",
+                cursor: "pointer",
+                color: "var(--mage-cream-60)",
+              }}
+              onClick={() => navigator.clipboard.writeText(shareUrl)}
+              title="Click to copy"
+            >
+              {shareUrl}
+            </code>
+            <button
+              type="button"
+              onClick={() => stopBroadcast(true)}
+              style={{
+                flexShrink: 0,
+                background: "transparent",
+                border: "1px solid rgba(192,57,43,0.4)",
+                color: "#e05c4a",
+                borderRadius: "4px",
+                padding: "0.4rem 0.9rem",
+                fontSize: "0.8rem",
+                cursor: "pointer",
+                whiteSpace: "nowrap",
+              }}
+            >
+              Stop Broadcasting
+            </button>
           </div>
         </>
       )}

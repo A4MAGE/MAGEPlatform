@@ -1151,10 +1151,7 @@
   display: flex;
   align-items: flex-start;
   gap: 2rem;
-  padding: 2rem;
-  background: var(--mage-cream-05);
-  border: 1px solid var(--mage-cream-10);
-  border-radius: var(--mage-radius-md);
+  padding: 0.5rem 0;
 }
 
 .mage-profile-hero__avatar-wrap {
