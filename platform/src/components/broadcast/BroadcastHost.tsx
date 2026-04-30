@@ -51,31 +51,35 @@ const BroadcastHost = () => {
       });
   }, []);
 
-  // Create the room row and open channel on mount — deps intentionally omit session
-  // to prevent auth token refreshes from re-running this and killing the broadcast
+  // Open channel immediately, then attempt DB upsert in parallel.
+  // Channel works independently — DB upsert is best-effort for viewer late-join.
   useEffect(() => {
     if (!supabase || !sessionRef.current?.user || !roomId) return;
 
     let active = true;
-    const defaultTitle = `${sessionRef.current.user.email?.split("@")[0]}'s room`;
 
+    // Open Realtime channel right away — don't wait for DB
+    const { publish, close } = openHostChannel(roomId);
+    publishRef.current = publish;
+    closeChannelRef.current = close;
+    setInitialized(true);
+
+    // DB upsert is best-effort — only used for viewer late-join fallback
+    const defaultTitle = `${sessionRef.current.user.email?.split("@")[0]}'s room`;
     supabase
       .from("broadcast_room")
       .upsert({ id: roomId, host_user_id: sessionRef.current!.user.id, title: defaultTitle, is_active: true }, { onConflict: "id" })
       .then(({ error: e }: { error: any }) => {
-        if (!active) return;
-        if (e) { setError(`Could not create room: ${e.message}`); return; }
-        const { publish, close } = openHostChannel(roomId);
-        publishRef.current = publish;
-        closeChannelRef.current = close;
-        setInitialized(true);
+        if (!active || !e) return;
+        // Non-fatal: channel is already open, broadcast still works
+        console.warn("broadcast_room DB upsert failed (run SQL fix):", e.message);
       });
 
     return () => {
       active = false;
       stopBroadcast(false);
     };
-  }, [roomId]); // session intentionally excluded — see comment above
+  }, [roomId]);
 
   // Periodic playback sync while playing
   useEffect(() => {
