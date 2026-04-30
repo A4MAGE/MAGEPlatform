@@ -189,6 +189,24 @@ const BroadcastHost = () => {
     publishRef.current?.({ type: "playback", playing: false, currentTime: engine?.getAudioTime() ?? 0 });
   };
 
+  const togglePlayPause = () => {
+    if (isPlaying) handlePause();
+    else handlePlay();
+  };
+
+  // Spacebar toggles play/pause
+  useEffect(() => {
+    if (!initialized) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.code !== "Space") return;
+      if ((e.target as HTMLElement).tagName === "INPUT" || (e.target as HTMLElement).tagName === "TEXTAREA") return;
+      e.preventDefault();
+      togglePlayPause();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [initialized, isPlaying, engine]);
+
   const shareUrl = `${window.location.origin}/broadcast/room/${roomId}`;
 
   if (error) return <div className="mage-page"><p className="mage-body" style={{ color: "red" }}>{error}</p></div>;
@@ -240,17 +258,19 @@ const BroadcastHost = () => {
                 readOnly
               />
               <div className="mage-engine__controls" style={{ marginTop: "8px" }}>
-                <button type="button" className="mage-btn--icon" aria-label="Play" onClick={handlePlay} disabled={!engine}>
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                    <polygon points="5 3 19 12 5 21 5 3" />
-                  </svg>
+                <button type="button" className="mage-btn--icon" aria-label={isPlaying ? "Pause" : "Play"} onClick={togglePlayPause} disabled={!engine}>
+                  {isPlaying ? (
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                      <rect x="6" y="4" width="4" height="16" rx="1" />
+                      <rect x="14" y="4" width="4" height="16" rx="1" />
+                    </svg>
+                  ) : (
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                      <polygon points="5 3 19 12 5 21 5 3" />
+                    </svg>
+                  )}
                 </button>
-                <button type="button" className="mage-btn--icon" aria-label="Pause" onClick={handlePause} disabled={!engine}>
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                    <rect x="6" y="4" width="4" height="16" rx="1" />
-                    <rect x="14" y="4" width="4" height="16" rx="1" />
-                  </svg>
-                </button>
+                <span style={{ fontSize: "11px", color: "var(--mage-cream-40)", marginLeft: "6px" }}>Space to toggle</span>
               </div>
             </div>
 
