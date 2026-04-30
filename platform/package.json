@@ -14,6 +14,7 @@
     "@fontsource/michroma": "^5.2.8",
     "@notrac/mage": "^1.0.1",
     "@supabase/supabase-js": "^2.99.0",
+    "ably": "^2.21.0",
     "embla-carousel-react": "^8.6.0",
     "fuse.js": "^7.1.0",
     "react": "^19.2.0",
