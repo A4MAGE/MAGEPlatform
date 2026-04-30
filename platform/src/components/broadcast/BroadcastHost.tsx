@@ -56,7 +56,7 @@ const BroadcastHost = () => {
     supabase
       .from("broadcast_room")
       .upsert(
-        { id: roomId, host_user_id: sessionRef.current.user.id, title, is_active: true, is_playing: false, current_time: 0 },
+        { id: roomId, host_user_id: sessionRef.current.user.id, title, is_active: true, is_playing: false, playback_time: 0 },
         { onConflict: "id" }
       )
       .then(({ error: e }: any) => {
@@ -142,13 +142,13 @@ const BroadcastHost = () => {
   const handlePlay = () => {
     engineRef.current?.play();
     setIsPlaying(true);
-    if (roomId) pushRoomState(roomId, { is_playing: true, current_time: engineRef.current?.getAudioTime() ?? 0 });
+    if (roomId) pushRoomState(roomId, { is_playing: true, playback_time: engineRef.current?.getAudioTime() ?? 0 });
   };
 
   const handlePause = () => {
     engineRef.current?.pause();
     setIsPlaying(false);
-    if (roomId) pushRoomState(roomId, { is_playing: false, current_time: engineRef.current?.getAudioTime() ?? 0 });
+    if (roomId) pushRoomState(roomId, { is_playing: false, playback_time: engineRef.current?.getAudioTime() ?? 0 });
   };
 
   const togglePlayPause = () => isPlaying ? handlePause() : handlePlay();

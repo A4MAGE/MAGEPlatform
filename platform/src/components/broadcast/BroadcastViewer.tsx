@@ -54,7 +54,7 @@ const BroadcastViewer = () => {
     if (row.current_audio_url) setCurrentAudio(row.current_audio_url);
     if (row.title) setTitle(row.title);
     if (typeof row.is_playing === "boolean") {
-      applyPlayback(row.is_playing, row.current_time ?? 0);
+      applyPlayback(row.is_playing, row.playback_time ?? 0);
     }
   };
 

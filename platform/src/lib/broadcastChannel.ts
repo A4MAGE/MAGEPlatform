@@ -16,7 +16,7 @@ export type RoomRow = {
   current_preset_data: object | null;
   current_audio_url: string | null;
   is_playing: boolean;
-  current_time: number;
+  playback_time: number;
   is_active: boolean;
 };
 
