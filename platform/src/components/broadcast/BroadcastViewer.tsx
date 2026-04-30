@@ -11,6 +11,7 @@ const BroadcastViewer = () => {
   const [ended, setEnded] = useState(false);
   const [currentPreset, setCurrentPreset] = useState<object | null>(null);
   const [currentAudio, setCurrentAudio] = useState<string | null>(null);
+  const [hostPlaying, setHostPlaying] = useState(false);
 
   const engineRef = useRef<MAGEEngineAPI | null>(null);
   const shouldPlayRef = useRef(false);
@@ -84,6 +85,8 @@ const BroadcastViewer = () => {
       }
     }
 
+    setHostPlaying(state.playing);
+
     if (state.playing) {
       if (!shouldPlayRef.current) {
         // Transition paused → playing
@@ -151,11 +154,12 @@ const BroadcastViewer = () => {
         readOnly
       />
 
-      {!currentPreset && (
-        <p className="mage-body" style={{ marginTop: "12px", color: "var(--mage-cream-60)" }}>
-          Waiting for host to load a preset…
-        </p>
-      )}
+      <div style={{ marginTop: "12px", fontSize: "12px", color: "var(--mage-cream-60)", display: "flex", flexDirection: "column", gap: "4px" }}>
+        {!currentPreset && <span>⏳ Waiting for host to load a preset…</span>}
+        {currentPreset && !currentAudio && hostPlaying && <span>⏳ Waiting for host to share audio…</span>}
+        {currentPreset && !hostPlaying && <span>⏸ Host is paused</span>}
+        {currentPreset && currentAudio && hostPlaying && <span>▶ Syncing audio…</span>}
+      </div>
     </div>
   );
 };

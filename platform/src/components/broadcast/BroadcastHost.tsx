@@ -17,6 +17,8 @@ const BroadcastHost = () => {
   const [activePreset, setActivePreset] = useState<Preset | null>(null);
   const [audioFileName, setAudioFileName] = useState("");
   const [audioUploading, setAudioUploading] = useState(false);
+  const [audioUploadError, setAudioUploadError] = useState<string | null>(null);
+  const [audioReady, setAudioReady] = useState(false);
   const [localAudioUrl, setLocalAudioUrl] = useState<string | undefined>(undefined);
   const [isPlaying, setIsPlaying] = useState(false);
   const [initialized, setInitialized] = useState(false);
@@ -132,6 +134,8 @@ const BroadcastHost = () => {
     setAudioUploading(false);
     if (error || !data) {
       console.error("[Host] upload FAILED:", error?.message, error);
+      setAudioUploadError(error?.message ?? "Upload failed");
+      setAudioReady(false);
       return;
     }
 
@@ -139,6 +143,8 @@ const BroadcastHost = () => {
     const { data: urlData } = supabase.storage.from("broadcast-audio").getPublicUrl(data.path);
     publicAudioUrlRef.current = urlData.publicUrl;
     console.log("[Host] public URL set →", urlData.publicUrl);
+    setAudioUploadError(null);
+    setAudioReady(true);
     pushState(); // now safe — upload done, URL is set
   };
 
@@ -199,13 +205,15 @@ const BroadcastHost = () => {
                 readOnly
               />
               <div className="mage-engine__controls" style={{ marginTop: "8px" }}>
-                <button type="button" className="mage-btn--icon" aria-label={isPlaying ? "Pause" : "Play"} onClick={togglePlayPause}>
+                <button type="button" className="mage-btn--icon" aria-label={isPlaying ? "Pause" : "Play"} onClick={togglePlayPause} disabled={!audioReady}>
                   {isPlaying
                     ? <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16" rx="1" /><rect x="14" y="4" width="4" height="16" rx="1" /></svg>
                     : <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3" /></svg>
                   }
                 </button>
-                <span style={{ fontSize: "11px", color: "var(--mage-cream-40)", marginLeft: "6px" }}>Space to toggle</span>
+                <span style={{ fontSize: "11px", color: audioReady ? "var(--mage-cream-40)" : "#e05c4a", marginLeft: "6px" }}>
+                  {audioReady ? "Space to toggle" : "Upload audio to enable playback"}
+                </span>
               </div>
             </div>
 
@@ -213,9 +221,12 @@ const BroadcastHost = () => {
               <div>
                 <p className="mage-body" style={{ fontSize: "12px", marginBottom: "6px" }}>Audio</p>
                 <input ref={fileInputRef} type="file" accept="audio/*" style={{ display: "none" }} onChange={handleAudioFileChange} />
-                <button type="button" className="mage-audio-picker" style={{ width: "100%" }} onClick={() => fileInputRef.current?.click()} disabled={audioUploading}>
-                  <span className="mage-audio-picker__label">{audioUploading ? "Uploading…" : "↑ Upload Audio"}</span>
-                  {audioFileName && <span className="mage-audio-picker__name">{audioUploading ? "Sharing with viewers…" : audioFileName}</span>}
+                <button type="button" className="mage-audio-picker" style={{ width: "100%", borderColor: audioUploadError ? "#e05c4a" : audioReady ? "#2ecc71" : undefined }} onClick={() => fileInputRef.current?.click()} disabled={audioUploading}>
+                  <span className="mage-audio-picker__label">
+                    {audioUploading ? "Uploading…" : audioReady ? "✓ Audio Ready" : "↑ Upload Audio"}
+                  </span>
+                  {audioUploadError && <span className="mage-audio-picker__name" style={{ color: "#e05c4a" }}>Error: {audioUploadError}</span>}
+                  {!audioUploadError && audioFileName && <span className="mage-audio-picker__name">{audioUploading ? "Sharing with viewers…" : audioFileName}</span>}
                 </button>
               </div>
 
