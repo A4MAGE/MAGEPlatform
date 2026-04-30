@@ -36,6 +36,10 @@ jobs:
       - name: Build
         working-directory: platform
         run: npm run build
+        env:
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_PUBLISHABLE_DEFAULT_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_DEFAULT_KEY }}
+          VITE_ABLY_KEY: ${{ secrets.VITE_ABLY_KEY }}
 
       - uses: actions/configure-pages@v4
 
