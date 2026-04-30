@@ -12,7 +12,7 @@ type RoomState = {
   is_active: boolean;
 };
 
-const DRIFT_THRESHOLD = 0.2; // seconds
+const DRIFT_THRESHOLD = 0.2;
 
 const BroadcastViewer = () => {
   const { roomId } = useParams<{ roomId: string }>();
@@ -28,11 +28,14 @@ const BroadcastViewer = () => {
   const closeChannelRef = useRef<CloseFn | null>(null);
   const pendingPlayRef = useRef<{ play: boolean; time: number } | null>(null);
   const pendingPlayIntervalRef = useRef<number | null>(null);
+  const currentPresetRef = useRef<object | null>(null);
 
-  // Fetch initial room state
+  // Keep ref in sync so the poll fallback can check without stale closure
+  useEffect(() => { currentPresetRef.current = currentPreset; }, [currentPreset]);
+
+  // Fetch initial room state from DB
   useEffect(() => {
     if (!supabase || !roomId) return;
-
     supabase
       .from("broadcast_room")
       .select("title, current_preset_data, current_audio_url, is_active")
@@ -41,7 +44,6 @@ const BroadcastViewer = () => {
       .then(({ data, error }: { data: any; error: any }) => {
         if (error || !data) { setNotFound(true); setLoading(false); return; }
         if (!data.is_active) { setEnded(true); setLoading(false); return; }
-
         setRoom(data);
         if (data.current_preset_data) setCurrentPreset(data.current_preset_data);
         if (data.current_audio_url) setCurrentAudio(data.current_audio_url);
@@ -49,16 +51,33 @@ const BroadcastViewer = () => {
       });
   }, [roomId]);
 
-  // Subscribe to channel once room is confirmed active
+  // Poll DB every 3s as fallback while viewer has no preset yet
+  useEffect(() => {
+    if (!supabase || !roomId || loading || ended || notFound) return;
+    const id = window.setInterval(async () => {
+      if (currentPresetRef.current) { window.clearInterval(id); return; }
+      const { data } = await supabase!
+        .from("broadcast_room")
+        .select("current_preset_data, current_audio_url, is_active")
+        .eq("id", roomId)
+        .single();
+      if (!data) return;
+      if (!data.is_active) { setEnded(true); window.clearInterval(id); return; }
+      if (data.current_preset_data) setCurrentPreset(data.current_preset_data);
+      if (data.current_audio_url) setCurrentAudio(data.current_audio_url);
+    }, 3000);
+    return () => window.clearInterval(id);
+  }, [roomId, loading, ended, notFound]);
+
+  // Subscribe to realtime channel
   useEffect(() => {
     if (!roomId || loading || ended || notFound) return;
 
     const handleMessage = (msg: BroadcastMessage) => {
       if (msg.type === "state") {
-        // Full state sync for late joiners — apply everything we don't already have
-        if (msg.presetData) setCurrentPreset((p) => p ?? msg.presetData);
-        if (msg.audioUrl) setCurrentAudio((a) => a ?? msg.audioUrl);
-        // Also handle playback from state sync
+        // Always apply latest — host is the source of truth
+        if (msg.presetData) setCurrentPreset(msg.presetData);
+        if (msg.audioUrl) setCurrentAudio(msg.audioUrl);
         const eng = engineRef.current;
         if (eng && msg.playing) {
           if (eng.isAudioLoaded()) {
@@ -81,7 +100,6 @@ const BroadcastViewer = () => {
             if (Math.abs(localTime - msg.currentTime) > DRIFT_THRESHOLD) eng.seek(msg.currentTime);
             eng.play();
           } else {
-            // Audio still loading — queue and retry every 100ms until ready
             pendingPlayRef.current = { play: true, time: msg.currentTime };
             if (!pendingPlayIntervalRef.current) {
               pendingPlayIntervalRef.current = window.setInterval(() => {
@@ -138,25 +156,8 @@ const BroadcastViewer = () => {
           <p className="mage-eyebrow"><span className="mage-eyebrow__num">05</span>Broadcast</p>
           <h1 className="mage-title">{room?.title ?? "Live Room"}</h1>
         </div>
-        <span
-          style={{
-            display: "inline-flex",
-            alignItems: "center",
-            gap: "6px",
-            fontSize: "12px",
-            color: "#e74c3c",
-            fontWeight: 600,
-          }}
-        >
-          <span
-            style={{
-              width: "8px",
-              height: "8px",
-              borderRadius: "50%",
-              background: "#e74c3c",
-              animation: "pulse 1.5s infinite",
-            }}
-          />
+        <span style={{ display: "inline-flex", alignItems: "center", gap: "6px", fontSize: "12px", color: "#e74c3c", fontWeight: 600 }}>
+          <span style={{ width: "8px", height: "8px", borderRadius: "50%", background: "#e74c3c", animation: "pulse 1.5s infinite" }} />
           LIVE
         </span>
       </header>

@@ -48,18 +48,39 @@ function channelName(roomId: string) {
 export type PublishFn = (msg: BroadcastMessage) => void;
 export type CloseFn = () => void;
 
-/** Open a host-side channel. Returns publish + close. */
+/** Open a host-side channel. Queues messages until the WS is SUBSCRIBED. */
 export function openHostChannel(roomId: string): {
   publish: PublishFn;
   close: CloseFn;
 } {
   if (!supabase) throw new Error("Supabase not initialised");
 
-  const channel = supabase.channel(channelName(roomId));
-  channel.subscribe();
+  const channel = supabase.channel(channelName(roomId), {
+    config: { broadcast: { self: false, ack: false } },
+  });
+
+  let ready = false;
+  const queue: BroadcastMessage[] = [];
+
+  const flush = () => {
+    queue.splice(0).forEach((msg) =>
+      channel.send({ type: "broadcast", event: msg.type, payload: msg })
+    );
+  };
+
+  channel.subscribe((status) => {
+    if (status === "SUBSCRIBED") {
+      ready = true;
+      flush();
+    }
+  });
 
   const publish: PublishFn = (msg) => {
-    channel.send({ type: "broadcast", event: msg.type, payload: msg });
+    if (ready) {
+      channel.send({ type: "broadcast", event: msg.type, payload: msg });
+    } else {
+      queue.push(msg);
+    }
   };
 
   const close: CloseFn = () => {
@@ -77,7 +98,9 @@ export function openViewerChannel(
   if (!supabase) throw new Error("Supabase not initialised");
 
   const channel = supabase
-    .channel(channelName(roomId))
+    .channel(channelName(roomId), {
+      config: { broadcast: { self: false } },
+    })
     .on("broadcast", { event: "preset" }, ({ payload }) => onMessage(payload as BroadcastMessage))
     .on("broadcast", { event: "audio" }, ({ payload }) => onMessage(payload as BroadcastMessage))
     .on("broadcast", { event: "playback" }, ({ payload }) => onMessage(payload as BroadcastMessage))
