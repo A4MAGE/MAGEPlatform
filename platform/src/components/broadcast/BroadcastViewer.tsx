@@ -1,45 +1,33 @@
 import { useEffect, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
-import { supabase } from "../../supabaseClient";
 import EnginePlayer from "../mage engine/EnginePlayer";
-import { openViewerSubscription, type RoomRow } from "../../lib/broadcastChannel";
+import { subscribeToRoom, type RoomState } from "../../lib/ablyBroadcast";
 import type { MAGEEngineAPI } from "@notrac/mage";
 
-const DRIFT_THRESHOLD = 0.3;
+const DRIFT = 0.3;
 
 const BroadcastViewer = () => {
   const { roomId } = useParams<{ roomId: string }>();
-  const [loading, setLoading] = useState(true);
-  const [notFound, setNotFound] = useState(false);
+  const [title] = useState("Live Room");
   const [ended, setEnded] = useState(false);
-  const [title, setTitle] = useState("Live Room");
-
   const [currentPreset, setCurrentPreset] = useState<object | null>(null);
   const [currentAudio, setCurrentAudio] = useState<string | null>(null);
 
   const engineRef = useRef<MAGEEngineAPI | null>(null);
-
-  // Intended playback state — decoupled from engine readiness
   const shouldPlayRef = useRef(false);
   const targetTimeRef = useRef(0);
-  const playRetryRef = useRef<number | null>(null);
+  const retryRef = useRef<number | null>(null);
 
-  const clearRetry = () => {
-    if (playRetryRef.current) { window.clearInterval(playRetryRef.current); playRetryRef.current = null; }
-  };
+  const clearRetry = () => { if (retryRef.current) { window.clearInterval(retryRef.current); retryRef.current = null; } };
 
-  // Try to play. If engine/audio not ready, keep retrying until they are.
   const tryPlay = (time: number) => {
     shouldPlayRef.current = true;
     targetTimeRef.current = time;
     clearRetry();
-    playRetryRef.current = window.setInterval(() => {
+    retryRef.current = window.setInterval(() => {
       const eng = engineRef.current;
-      if (!eng) return; // engine not mounted yet
-      if (!eng.isAudioLoaded()) return; // audio still loading
-      if (Math.abs(eng.getAudioTime() - targetTimeRef.current) > DRIFT_THRESHOLD) {
-        eng.seek(targetTimeRef.current);
-      }
+      if (!eng || !eng.isAudioLoaded()) return;
+      if (Math.abs(eng.getAudioTime() - targetTimeRef.current) > DRIFT) eng.seek(targetTimeRef.current);
       eng.play();
       clearRetry();
     }, 100);
@@ -51,55 +39,27 @@ const BroadcastViewer = () => {
     engineRef.current?.pause();
   };
 
-  const applyPlayback = (playing: boolean, time: number) => {
-    if (playing) tryPlay(time);
+  const applyState = (state: RoomState) => {
+    if (state.ended) { setEnded(true); return; }
+    if (state.presetData) setCurrentPreset(state.presetData);
+    if (state.audioUrl) setCurrentAudio(state.audioUrl);
+    if (state.playing) tryPlay(state.playbackTime);
     else tryPause();
   };
 
-  const applyRow = (row: Partial<RoomRow>) => {
-    if (row.is_active === false) { setEnded(true); return; }
-    if (row.current_preset_data) setCurrentPreset(row.current_preset_data);
-    if (row.current_audio_url) setCurrentAudio(row.current_audio_url);
-    if (row.title) setTitle(row.title);
-    if (typeof row.is_playing === "boolean") {
-      applyPlayback(row.is_playing, row.playback_time ?? 0);
-    }
-  };
-
-  // When engine becomes ready, retry play if we should be playing
   const onEngineReady = (eng: MAGEEngineAPI) => {
     engineRef.current = eng;
     if (shouldPlayRef.current) tryPlay(targetTimeRef.current);
   };
 
-  // Fetch initial room state
   useEffect(() => {
-    if (!supabase || !roomId) return;
-    supabase
-      .from("broadcast_room")
-      .select("*")
-      .eq("id", roomId)
-      .single()
-      .then(({ data, error }: any) => {
-        if (error || !data) { setNotFound(true); setLoading(false); return; }
-        applyRow(data as RoomRow);
-        setLoading(false);
-      });
+    if (!roomId) return;
+    // rewind:1 in subscribeToRoom means Ably replays the last published state
+    // immediately on subscribe — late joiners get it within milliseconds
+    const unsub = subscribeToRoom(roomId, applyState);
+    return () => { unsub(); clearRetry(); };
   }, [roomId]);
 
-  // Subscribe to Postgres Changes + broadcast ticks
-  useEffect(() => {
-    if (!roomId || loading || notFound) return;
-    const unsub = openViewerSubscription(
-      roomId,
-      (row) => applyRow(row),
-      (tick) => applyPlayback(tick.playing, tick.currentTime)
-    );
-    return () => { unsub(); clearRetry(); };
-  }, [roomId, loading, notFound]);
-
-  if (loading) return <div className="mage-page"><p className="mage-body">Joining room…</p></div>;
-  if (notFound) return <div className="mage-page"><p className="mage-body">Room not found.</p></div>;
   if (ended) return (
     <div className="mage-page">
       <header className="mage-page__header">
