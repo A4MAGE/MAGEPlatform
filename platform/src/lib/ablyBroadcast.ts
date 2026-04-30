@@ -33,9 +33,8 @@ const channelName = (roomId: string) => `broadcast:${roomId}`;
 
 /** Host: publish state. Call this on every change and on a 2s interval. */
 export function publishState(roomId: string, state: RoomState): void {
-  const ch = getClient().channels.get(channelName(roomId), {
-    params: { rewind: "1" },
-  });
+  // No rewind param on publish side — rewind is subscriber-only
+  const ch = getClient().channels.get(channelName(roomId));
   ch.publish("state", state);
 }
 
