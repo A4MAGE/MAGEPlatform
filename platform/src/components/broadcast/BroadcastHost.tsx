@@ -53,15 +53,15 @@ const BroadcastHost = () => {
     publishState(roomId, state);
   };
 
-  // Load user presets
+  // Load user presets — re-run when session arrives (auth loads async)
   useEffect(() => {
-    if (!supabase || !sessionRef.current?.user) return;
+    if (!supabase || !session?.user) return;
     supabase
       .from("preset")
       .select("id, name, scene_data, thumbnail_url")
-      .eq("user_id", sessionRef.current.user.id)
+      .eq("user_id", session.user.id)
       .then(({ data, error }: any) => { if (!error && data) setPresets(data); });
-  }, []);
+  }, [session]);
 
   // Start Ably publishing immediately — don't wait for DB
   useEffect(() => {
