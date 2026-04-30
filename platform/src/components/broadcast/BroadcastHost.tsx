@@ -126,7 +126,8 @@ const BroadcastHost = () => {
       console.warn("[Host] bucket create warning:", bucketError.message);
     }
 
-    const path = `${roomId}/${Date.now()}-${file.name}`;
+    const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
+    const path = `${roomId}/${Date.now()}-${safeName}`;
     console.log("[Host] uploading:", path);
     const { data, error } = await supabase.storage.from("broadcast-audio").upload(path, file, { upsert: true });
     setAudioUploading(false);
