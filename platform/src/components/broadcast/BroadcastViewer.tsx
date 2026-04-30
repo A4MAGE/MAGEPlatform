@@ -75,14 +75,30 @@ const BroadcastViewer = () => {
 
     const handleMessage = (msg: BroadcastMessage) => {
       if (msg.type === "state") {
-        // Always apply latest — host is the source of truth
         if (msg.presetData) setCurrentPreset(msg.presetData);
         if (msg.audioUrl) setCurrentAudio(msg.audioUrl);
         const eng = engineRef.current;
-        if (eng && msg.playing) {
-          if (eng.isAudioLoaded()) {
-            if (Math.abs(eng.getAudioTime() - msg.currentTime) > DRIFT_THRESHOLD) eng.seek(msg.currentTime);
+        if (msg.playing) {
+          if (eng?.isAudioLoaded()) {
+            if (Math.abs((eng.getAudioTime()) - msg.currentTime) > DRIFT_THRESHOLD) eng.seek(msg.currentTime);
             eng.play();
+          } else {
+            // Audio not loaded yet — queue play so it fires once audio is ready
+            pendingPlayRef.current = { play: true, time: msg.currentTime };
+            if (!pendingPlayIntervalRef.current) {
+              pendingPlayIntervalRef.current = window.setInterval(() => {
+                const e = engineRef.current;
+                const pending = pendingPlayRef.current;
+                if (!e || !pending) { window.clearInterval(pendingPlayIntervalRef.current!); pendingPlayIntervalRef.current = null; return; }
+                if (e.isAudioLoaded()) {
+                  if (Math.abs(e.getAudioTime() - pending.time) > DRIFT_THRESHOLD) e.seek(pending.time);
+                  e.play();
+                  pendingPlayRef.current = null;
+                  window.clearInterval(pendingPlayIntervalRef.current!);
+                  pendingPlayIntervalRef.current = null;
+                }
+              }, 100);
+            }
           }
         }
         return;

@@ -31,6 +31,8 @@ const BroadcastHost = () => {
   const stateSyncIntervalRef = useRef<number | null>(null);
   const activePresetRef = useRef<Preset | null>(null);
   const loadedAudioUrlRef = useRef<string | undefined>(undefined);
+  // Public Supabase URL — the only URL viewers can actually load
+  const publicAudioUrlRef = useRef<string | null>(null);
   const sessionRef = useRef(session);
   useEffect(() => { sessionRef.current = session; }, [session]);
 
@@ -154,7 +156,7 @@ const BroadcastHost = () => {
         type: "state",
         presetData: activePresetRef.current?.scene_data ?? null,
         presetId: activePresetRef.current?.id ?? null,
-        audioUrl: loadedAudioUrlRef.current ?? null,
+        audioUrl: publicAudioUrlRef.current,  // public URL only — blob URL is useless to viewers
         playing: isPlaying,
         currentTime: engineRef.current?.getAudioTime() ?? 0,
       });
@@ -197,6 +199,7 @@ const BroadcastHost = () => {
 
     const { data: urlData } = supabase.storage.from("broadcast-audio").getPublicUrl(data.path);
     const publicUrl = urlData.publicUrl;
+    publicAudioUrlRef.current = publicUrl; // store for state sync — blob URL is host-only
 
     publishRef.current?.({ type: "audio", audioUrl: publicUrl });
     supabase
