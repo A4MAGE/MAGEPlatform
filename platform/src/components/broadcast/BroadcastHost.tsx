@@ -3,7 +3,7 @@ import { useNavigate, useParams, useBlocker } from "react-router-dom";
 import { supabase } from "../../supabaseClient";
 import { UserAuth } from "../../context/AuthContext";
 import EnginePlayer from "../mage engine/EnginePlayer";
-import { openHostChannel, type PublishFn, type CloseFn } from "../../lib/broadcastChannel";
+import { pushRoomState, openHostTicker } from "../../lib/broadcastChannel";
 import type { MAGEEngineAPI } from "@notrac/mage";
 
 type Preset = { id: number; name: string; scene_data: object; thumbnail_url?: string };
@@ -14,180 +14,112 @@ const BroadcastHost = () => {
   const navigate = useNavigate();
 
   const [engine, setEngine] = useState<MAGEEngineAPI | null>(null);
+  const engineRef = useRef<MAGEEngineAPI | null>(null);
   const [presets, setPresets] = useState<Preset[]>([]);
   const [activePreset, setActivePreset] = useState<Preset | null>(null);
   const [audioFileName, setAudioFileName] = useState("");
   const [audioUploading, setAudioUploading] = useState(false);
-  const [loadedAudioUrl, setLoadedAudioUrl] = useState<string | undefined>(undefined);
-  const fileInputRef = useRef<HTMLInputElement | null>(null);
-  const blobUrlRef = useRef<string | null>(null);
+  const [localAudioUrl, setLocalAudioUrl] = useState<string | undefined>(undefined);
   const [isPlaying, setIsPlaying] = useState(false);
   const [initialized, setInitialized] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [roomError, setRoomError] = useState<string | null>(null);
 
-  const publishRef = useRef<PublishFn | null>(null);
-  const closeChannelRef = useRef<CloseFn | null>(null);
-  const playbackIntervalRef = useRef<number | null>(null);
-  const stateSyncIntervalRef = useRef<number | null>(null);
-  const activePresetRef = useRef<Preset | null>(null);
-  const loadedAudioUrlRef = useRef<string | undefined>(undefined);
-  // Public Supabase URL — the only URL viewers can actually load
-  const publicAudioUrlRef = useRef<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const blobUrlRef = useRef<string | null>(null);
+  const tickerRef = useRef<{ tick: (t: any) => void; close: () => void } | null>(null);
+  const tickIntervalRef = useRef<number | null>(null);
   const sessionRef = useRef(session);
   useEffect(() => { sessionRef.current = session; }, [session]);
 
-  // Revoke blob URL on unmount
-  useEffect(() => {
-    return () => { if (blobUrlRef.current) URL.revokeObjectURL(blobUrlRef.current); };
-  }, []);
+  // Keep engineRef current
+  useEffect(() => { engineRef.current = engine; }, [engine]);
 
-  // Load user's presets once on mount
+  // Revoke blob URL on unmount
+  useEffect(() => () => { if (blobUrlRef.current) URL.revokeObjectURL(blobUrlRef.current); }, []);
+
+  // Load user presets
   useEffect(() => {
     if (!supabase || !sessionRef.current?.user) return;
     supabase
       .from("preset")
       .select("id, name, scene_data, thumbnail_url")
       .eq("user_id", sessionRef.current.user.id)
-      .then(({ data, error: e }: { data: any; error: any }) => {
-        if (!e && data) setPresets(data);
-      });
+      .then(({ data, error }: any) => { if (!error && data) setPresets(data); });
   }, []);
 
-  // Open channel immediately, then attempt DB upsert in parallel.
-  // Channel works independently — DB upsert is best-effort for viewer late-join.
+  // Create room row + open ticker on mount
   useEffect(() => {
     if (!supabase || !sessionRef.current?.user || !roomId) return;
-
     let active = true;
 
-    // Open Realtime channel right away — don't wait for DB
-    const { publish, close } = openHostChannel(roomId);
-    publishRef.current = publish;
-    closeChannelRef.current = close;
-    setInitialized(true);
-
-    // DB upsert is best-effort — only used for viewer late-join fallback
-    const defaultTitle = `${sessionRef.current.user.email?.split("@")[0]}'s room`;
+    const title = `${sessionRef.current.user.email?.split("@")[0]}'s room`;
     supabase
       .from("broadcast_room")
-      .upsert({ id: roomId, host_user_id: sessionRef.current!.user.id, title: defaultTitle, is_active: true }, { onConflict: "id" })
-      .then(({ error: e }: { error: any }) => {
-        if (!active || !e) return;
-        // Non-fatal: channel is already open, broadcast still works
-        console.warn("broadcast_room DB upsert failed (run SQL fix):", e.message);
+      .upsert(
+        { id: roomId, host_user_id: sessionRef.current.user.id, title, is_active: true, is_playing: false, current_time: 0 },
+        { onConflict: "id" }
+      )
+      .then(({ error: e }: any) => {
+        if (!active) return;
+        if (e) { setRoomError(e.message); return; }
+        tickerRef.current = openHostTicker(roomId);
+        setInitialized(true);
       });
 
     return () => {
       active = false;
-      stopBroadcast(false);
+      doStop(false);
     };
   }, [roomId]);
 
-  // Periodic playback sync while playing
+  // Playback tick — sends current time to viewers for drift correction
   useEffect(() => {
-    if (!isPlaying || !engine || !publishRef.current) return;
-
-    playbackIntervalRef.current = window.setInterval(() => {
-      publishRef.current?.({
-        type: "playback",
-        playing: true,
-        currentTime: engine.getAudioTime(),
-      });
+    if (!isPlaying || !initialized) return;
+    tickIntervalRef.current = window.setInterval(() => {
+      const t = engineRef.current?.getAudioTime() ?? 0;
+      tickerRef.current?.tick({ type: "tick", currentTime: t, playing: true });
     }, 500);
+    return () => { if (tickIntervalRef.current) window.clearInterval(tickIntervalRef.current); };
+  }, [isPlaying, initialized]);
 
-    return () => {
-      if (playbackIntervalRef.current) window.clearInterval(playbackIntervalRef.current);
-    };
-  }, [isPlaying, engine]);
-
-  // Block in-app navigation away from the host page while live
   useBlocker(
     ({ currentLocation, nextLocation }) =>
       initialized &&
       currentLocation.pathname !== nextLocation.pathname &&
-      !window.confirm("You're still live. Leaving will stop the broadcast — are you sure?")
+      !window.confirm("You're still live. Leaving will stop the broadcast.")
   );
 
-  // Reconnect Supabase channel when tab becomes visible again (browser throttles background WS)
-  useEffect(() => {
-    if (!initialized || !roomId) return;
-    const handleVisibility = () => {
-      if (document.visibilityState === "visible" && !closeChannelRef.current) {
-        const { publish, close } = openHostChannel(roomId);
-        publishRef.current = publish;
-        closeChannelRef.current = close;
-      }
-    };
-    document.addEventListener("visibilitychange", handleVisibility);
-    return () => document.removeEventListener("visibilitychange", handleVisibility);
-  }, [initialized, roomId]);
-
-  // Warn on browser tab close / reload
   useEffect(() => {
     if (!initialized) return;
-    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
-      e.preventDefault();
-      e.returnValue = "";
-    };
-    window.addEventListener("beforeunload", handleBeforeUnload);
-    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
+    const onUnload = (e: BeforeUnloadEvent) => { e.preventDefault(); e.returnValue = ""; };
+    window.addEventListener("beforeunload", onUnload);
+    return () => window.removeEventListener("beforeunload", onUnload);
   }, [initialized]);
 
-  const stopBroadcast = (navigate_away = true) => {
-    if (playbackIntervalRef.current) window.clearInterval(playbackIntervalRef.current);
-    publishRef.current?.({ type: "end" });
-    closeChannelRef.current?.();
+  const doStop = (nav = true) => {
+    if (tickIntervalRef.current) window.clearInterval(tickIntervalRef.current);
+    tickerRef.current?.close();
     if (supabase && roomId) {
-      supabase.from("broadcast_room").update({ is_active: false }).eq("id", roomId);
+      pushRoomState(roomId, { is_active: false, is_playing: false });
     }
-    if (navigate_away) navigate("/broadcast");
+    if (nav) navigate("/broadcast");
   };
-
-  // Keep refs in sync so the state-sync interval always has latest values
-  useEffect(() => { activePresetRef.current = activePreset; }, [activePreset]);
-  useEffect(() => { loadedAudioUrlRef.current = loadedAudioUrl; }, [loadedAudioUrl]);
-
-  // State-sync broadcast every 2s — late-joining viewers catch up within 2s
-  useEffect(() => {
-    if (!initialized) return;
-    stateSyncIntervalRef.current = window.setInterval(() => {
-      if (!publishRef.current) return;
-      publishRef.current({
-        type: "state",
-        presetData: activePresetRef.current?.scene_data ?? null,
-        presetId: activePresetRef.current?.id ?? null,
-        audioUrl: publicAudioUrlRef.current,  // public URL only — blob URL is useless to viewers
-        playing: isPlaying,
-        currentTime: engineRef.current?.getAudioTime() ?? 0,
-      });
-    }, 2000);
-    return () => { if (stateSyncIntervalRef.current) window.clearInterval(stateSyncIntervalRef.current); };
-  }, [initialized, isPlaying]);
 
   const handlePresetSelect = (preset: Preset) => {
     setActivePreset(preset);
-    publishRef.current?.({ type: "preset", presetData: preset.scene_data, presetId: preset.id });
-    // Update room row so late joiners see current preset
-    if (supabase && roomId) {
-      supabase
-        .from("broadcast_room")
-        .update({ current_preset_id: preset.id, current_preset_data: preset.scene_data, updated_at: new Date().toISOString() })
-        .eq("id", roomId);
-    }
+    if (roomId) pushRoomState(roomId, { current_preset_data: preset.scene_data });
   };
 
   const handleAudioFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file || !supabase || !roomId) return;
 
-    // Play locally via blob URL immediately so host doesn't wait for upload
     if (blobUrlRef.current) URL.revokeObjectURL(blobUrlRef.current);
     const blobUrl = URL.createObjectURL(file);
     blobUrlRef.current = blobUrl;
     setAudioFileName(file.name);
-    setLoadedAudioUrl(blobUrl);
+    setLocalAudioUrl(blobUrl);
 
-    // Upload to Supabase Storage so viewers get the same public URL
     setAudioUploading(true);
     const path = `${roomId}/${Date.now()}-${file.name}`;
     const { data, error: uploadError } = await supabase.storage
@@ -195,37 +127,32 @@ const BroadcastHost = () => {
       .upload(path, file, { upsert: true });
 
     setAudioUploading(false);
-    if (uploadError || !data) return;
+    if (uploadError || !data) {
+      console.error("Audio upload failed:", uploadError?.message);
+      return;
+    }
 
     const { data: urlData } = supabase.storage.from("broadcast-audio").getPublicUrl(data.path);
     const publicUrl = urlData.publicUrl;
-    publicAudioUrlRef.current = publicUrl; // store for state sync — blob URL is host-only
 
-    publishRef.current?.({ type: "audio", audioUrl: publicUrl });
-    supabase
-      .from("broadcast_room")
-      .update({ current_audio_url: publicUrl, updated_at: new Date().toISOString() })
-      .eq("id", roomId);
+    // Write public URL to DB — viewers subscribed to Postgres Changes get it instantly
+    pushRoomState(roomId, { current_audio_url: publicUrl });
   };
 
   const handlePlay = () => {
-    engine?.play();
+    engineRef.current?.play();
     setIsPlaying(true);
-    publishRef.current?.({ type: "playback", playing: true, currentTime: engine?.getAudioTime() ?? 0 });
+    if (roomId) pushRoomState(roomId, { is_playing: true, current_time: engineRef.current?.getAudioTime() ?? 0 });
   };
 
   const handlePause = () => {
-    engine?.pause();
+    engineRef.current?.pause();
     setIsPlaying(false);
-    publishRef.current?.({ type: "playback", playing: false, currentTime: engine?.getAudioTime() ?? 0 });
+    if (roomId) pushRoomState(roomId, { is_playing: false, current_time: engineRef.current?.getAudioTime() ?? 0 });
   };
 
-  const togglePlayPause = () => {
-    if (isPlaying) handlePause();
-    else handlePlay();
-  };
+  const togglePlayPause = () => isPlaying ? handlePause() : handlePlay();
 
-  // Spacebar toggles play/pause
   useEffect(() => {
     if (!initialized) return;
     const onKey = (e: KeyboardEvent) => {
@@ -236,11 +163,17 @@ const BroadcastHost = () => {
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [initialized, isPlaying, engine]);
+  }, [initialized, isPlaying]);
 
   const shareUrl = `${window.location.origin}/broadcast/room/${roomId}`;
 
-  if (error) return <div className="mage-page"><p className="mage-body" style={{ color: "red" }}>{error}</p></div>;
+  if (roomError) return (
+    <div className="mage-page">
+      <p className="mage-body" style={{ color: "#e74c3c" }}>
+        Could not start room: {roomError}. Run the SQL in database/broadcast_room_v2.sql in Supabase.
+      </p>
+    </div>
+  );
 
   return (
     <div className="mage-page">
@@ -254,63 +187,36 @@ const BroadcastHost = () => {
       {initialized && (
         <>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 280px", gap: "24px" }}>
-            {/* Engine */}
             <div>
               <EnginePlayer
                 preset={activePreset?.scene_data ?? null}
-                audioSource={loadedAudioUrl}
-                onEngineReady={setEngine}
+                audioSource={localAudioUrl}
+                onEngineReady={(e) => { setEngine(e); engineRef.current = e; }}
                 displayControls={false}
                 readOnly
               />
               <div className="mage-engine__controls" style={{ marginTop: "8px" }}>
                 <button type="button" className="mage-btn--icon" aria-label={isPlaying ? "Pause" : "Play"} onClick={togglePlayPause} disabled={!engine}>
                   {isPlaying ? (
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                      <rect x="6" y="4" width="4" height="16" rx="1" />
-                      <rect x="14" y="4" width="4" height="16" rx="1" />
-                    </svg>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16" rx="1" /><rect x="14" y="4" width="4" height="16" rx="1" /></svg>
                   ) : (
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                      <polygon points="5 3 19 12 5 21 5 3" />
-                    </svg>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3" /></svg>
                   )}
                 </button>
                 <span style={{ fontSize: "11px", color: "var(--mage-cream-40)", marginLeft: "6px" }}>Space to toggle</span>
               </div>
             </div>
 
-            {/* Controls panel */}
             <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
-              {/* Audio file picker */}
               <div>
                 <p className="mage-body" style={{ fontSize: "12px", marginBottom: "6px" }}>Audio</p>
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept="audio/*"
-                  style={{ display: "none" }}
-                  onChange={handleAudioFileChange}
-                />
-                <button
-                  type="button"
-                  className="mage-audio-picker"
-                  style={{ width: "100%" }}
-                  onClick={() => fileInputRef.current?.click()}
-                  disabled={audioUploading}
-                >
-                  <span className="mage-audio-picker__label">
-                    {audioUploading ? "Uploading…" : "↑ Upload Audio"}
-                  </span>
-                  {audioFileName && (
-                    <span className="mage-audio-picker__name">
-                      {audioUploading ? "Sharing with viewers…" : audioFileName}
-                    </span>
-                  )}
+                <input ref={fileInputRef} type="file" accept="audio/*" style={{ display: "none" }} onChange={handleAudioFileChange} />
+                <button type="button" className="mage-audio-picker" style={{ width: "100%" }} onClick={() => fileInputRef.current?.click()} disabled={audioUploading}>
+                  <span className="mage-audio-picker__label">{audioUploading ? "Uploading…" : "↑ Upload Audio"}</span>
+                  {audioFileName && <span className="mage-audio-picker__name">{audioUploading ? "Sharing with viewers…" : audioFileName}</span>}
                 </button>
               </div>
 
-              {/* Preset picker */}
               <div>
                 <p className="mage-body" style={{ fontSize: "12px", marginBottom: "6px" }}>Your Presets</p>
                 {presets.length === 0 ? (
@@ -318,16 +224,8 @@ const BroadcastHost = () => {
                 ) : (
                   <div style={{ display: "flex", flexDirection: "column", gap: "6px", maxHeight: "320px", overflowY: "auto" }}>
                     {presets.map((p) => (
-                      <button
-                        key={p.id}
-                        type="button"
-                        className="mage-btn"
-                        onClick={() => handlePresetSelect(p)}
-                        style={{
-                          textAlign: "left",
-                          background: activePreset?.id === p.id ? "var(--mage-accent, #6c63ff)" : undefined,
-                        }}
-                      >
+                      <button key={p.id} type="button" className="mage-btn" onClick={() => handlePresetSelect(p)}
+                        style={{ textAlign: "left", background: activePreset?.id === p.id ? "var(--mage-accent, #6c63ff)" : undefined }}>
                         {p.name}
                       </button>
                     ))}
@@ -337,47 +235,22 @@ const BroadcastHost = () => {
             </div>
           </div>
 
-          {/* Share link + Stop — bottom of page */}
           <div style={{ marginTop: "24px", display: "flex", alignItems: "center", gap: "12px" }}>
             <code
-              style={{
-                flex: 1,
-                background: "var(--mage-cream-05)",
-                border: "1px solid var(--mage-cream-10)",
-                padding: "6px 10px",
-                borderRadius: "4px",
-                fontSize: "12px",
-                wordBreak: "break-all",
-                cursor: "pointer",
-                color: "var(--mage-cream-60)",
-              }}
-              onClick={() => navigator.clipboard.writeText(shareUrl)}
-              title="Click to copy"
+              style={{ flex: 1, background: "var(--mage-cream-05)", border: "1px solid var(--mage-cream-10)", padding: "6px 10px", borderRadius: "4px", fontSize: "12px", wordBreak: "break-all", cursor: "pointer", color: "var(--mage-cream-60)" }}
+              onClick={() => navigator.clipboard.writeText(shareUrl)} title="Click to copy"
             >
               {shareUrl}
             </code>
-            <button
-              type="button"
-              onClick={() => stopBroadcast(true)}
-              style={{
-                flexShrink: 0,
-                background: "transparent",
-                border: "1px solid rgba(192,57,43,0.4)",
-                color: "#e05c4a",
-                borderRadius: "4px",
-                padding: "0.4rem 0.9rem",
-                fontSize: "0.8rem",
-                cursor: "pointer",
-                whiteSpace: "nowrap",
-              }}
-            >
+            <button type="button" onClick={() => doStop(true)}
+              style={{ flexShrink: 0, background: "transparent", border: "1px solid rgba(192,57,43,0.4)", color: "#e05c4a", borderRadius: "4px", padding: "0.4rem 0.9rem", fontSize: "0.8rem", cursor: "pointer", whiteSpace: "nowrap" }}>
               Stop Broadcasting
             </button>
           </div>
         </>
       )}
 
-      {!initialized && <p className="mage-body">Setting up room…</p>}
+      {!initialized && !roomError && <p className="mage-body">Setting up room…</p>}
     </div>
   );
 };
