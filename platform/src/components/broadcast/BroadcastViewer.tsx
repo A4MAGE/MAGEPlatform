@@ -101,15 +101,19 @@ const BroadcastViewer = () => {
     setHostPlaying(state.playing);
 
     if (state.playing) {
+      // Compensate for time elapsed since host sent this message
+      const elapsed = state.sentAt ? (Date.now() - state.sentAt) / 1000 : 0;
+      const adjustedTime = state.playbackTime + elapsed;
+
       if (!shouldPlayRef.current) {
-        startPlay(state.playbackTime);
+        startPlay(adjustedTime);
       } else {
         const eng = engineRef.current;
         if (eng?.isAudioLoaded()) {
-          const drift = Math.abs(eng.getAudioTime() - state.playbackTime);
-          if (drift > LARGE_DRIFT) eng.seek(state.playbackTime);
+          const drift = Math.abs(eng.getAudioTime() - adjustedTime);
+          if (drift > LARGE_DRIFT) eng.seek(adjustedTime);
         } else {
-          targetTimeRef.current = state.playbackTime;
+          targetTimeRef.current = adjustedTime;
         }
       }
     } else {

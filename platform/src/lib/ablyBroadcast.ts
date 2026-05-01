@@ -24,6 +24,7 @@ export type RoomState = {
   audioUrl: string | null;
   playing: boolean;
   playbackTime: number;
+  sentAt?: number; // host wall-clock ms — used by viewer to correct for transit delay
   ended?: boolean;
 };
 

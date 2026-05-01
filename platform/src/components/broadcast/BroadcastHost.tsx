@@ -40,6 +40,7 @@ const BroadcastHost = () => {
       audioUrl: publicAudioUrlRef.current,
       playing: overrides.playing ?? isPlayingRef.current,
       playbackTime: overrides.playbackTime ?? engineRef.current?.getAudioTime() ?? 0,
+      sentAt: Date.now(),
     };
     console.log("[Host] push", { hasPreset: !!state.presetData, audioUrl: state.audioUrl, playing: state.playing });
     publishState(roomId, state);
