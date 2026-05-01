@@ -764,7 +764,7 @@
 
 .mage-grid-player {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 200px;
+  grid-template-columns: minmax(0, 1fr) 280px;
   gap: clamp(2rem, 5vw, 4rem);
   align-items: start;
 }
@@ -798,6 +798,7 @@
   aspect-ratio: 16 / 9;
   background: rgba(10, 10, 12, 0.6);
   border: 1px solid var(--mage-cream-10);
+  border-radius: 12px;
   overflow: hidden;
 }
 
@@ -828,6 +829,30 @@
   border-radius: 999px;
   padding: 0 0.5rem;
   height: 40px;
+}
+
+.mage-engine__progress-track {
+  flex: 1;
+  height: 3px;
+  background: rgba(255, 251, 219, 0.1);
+  border-radius: 999px;
+  margin: 0 8px;
+  overflow: hidden;
+}
+
+.mage-engine__progress-fill {
+  height: 100%;
+  background: var(--mage-mint-60);
+  border-radius: 999px;
+  transition: width 0.25s linear;
+}
+
+.mage-engine__timestamp {
+  font-size: 0.72rem;
+  color: var(--mage-cream-40);
+  white-space: nowrap;
+  letter-spacing: 0.04em;
+  margin-right: 4px;
 }
 
 /* icon buttons inside the bar — no individual borders */
@@ -1292,3 +1317,206 @@
   display: block;
 }
 
+
+/* ---------- preset side card ---------- */
+
+.mage-preset-card {
+  display: flex;
+  flex-direction: column;
+  background: rgba(12, 12, 14, 0.6);
+  border: 1px solid var(--mage-cream-10);
+  border-radius: 12px;
+  overflow: hidden;
+  height: 100%;
+  max-height: 70vh;
+}
+
+.mage-preset-card__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.65rem 0.75rem;
+  border-bottom: 1px solid var(--mage-cream-10);
+  flex-shrink: 0;
+}
+
+.mage-preset-card__header-left {
+  flex: 1;
+  min-width: 0;
+}
+
+.mage-preset-card__select {
+  background: transparent;
+  border: none;
+  color: var(--mage-cream-60);
+  font-family: var(--mage-font-body);
+  font-size: 0.72rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  cursor: pointer;
+  outline: none;
+  width: 100%;
+}
+
+.mage-preset-card__select option {
+  background: #0e0e10;
+  color: var(--mage-cream);
+}
+
+.mage-preset-card__search-input {
+  width: 100%;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid var(--mage-mint-30);
+  color: var(--mage-cream);
+  font-family: var(--mage-font-body);
+  font-size: 0.82rem;
+  padding: 2px 0;
+  outline: none;
+}
+
+.mage-preset-card__search-input::placeholder {
+  color: var(--mage-cream-40);
+}
+
+.mage-preset-card__search-btn {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  background: none;
+  border: none;
+  border-radius: 6px;
+  color: var(--mage-cream-40);
+  cursor: pointer;
+  transition: color 0.15s ease, background 0.15s ease;
+}
+
+.mage-preset-card__search-btn:hover {
+  color: var(--mage-cream);
+  background: var(--mage-cream-10);
+}
+
+.mage-preset-card__list {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.mage-preset-card__item {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.5rem 0.75rem;
+  width: 100%;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid var(--mage-cream-05);
+  color: var(--mage-cream-60);
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.mage-preset-card__item:hover {
+  background: var(--mage-mint-08);
+  color: var(--mage-cream);
+}
+
+.mage-preset-card__thumb {
+  width: 36px;
+  height: 36px;
+  border-radius: 6px;
+  flex-shrink: 0;
+  overflow: hidden;
+}
+
+.mage-preset-card__info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.mage-preset-card__name {
+  font-family: var(--mage-font-body);
+  font-size: 0.78rem;
+  color: var(--mage-cream);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.mage-preset-card__author {
+  font-size: 0.68rem;
+  color: var(--mage-cream-40);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.mage-preset-card__empty {
+  padding: 1rem 0.75rem;
+  font-size: 0.78rem;
+  color: var(--mage-cream-40);
+}
+
+/* ---------- save modal ---------- */
+
+.mage-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.mage-modal {
+  background: rgba(14, 14, 16, 0.92);
+  border: 1px solid var(--mage-cream-20);
+  border-radius: 14px;
+  padding: 2rem;
+  width: 100%;
+  max-width: 380px;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.5);
+}
+
+.mage-modal__title {
+  font-family: var(--mage-font-display);
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--mage-cream);
+  margin: 0;
+}
+
+.mage-modal__input {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.mage-modal__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+}
+
+.mage-player-preset-title {
+  font-family: var(--mage-font-display);
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--mage-cream);
+  margin: 0;
+  letter-spacing: 0.01em;
+}

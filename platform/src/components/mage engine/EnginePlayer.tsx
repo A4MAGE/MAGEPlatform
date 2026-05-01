@@ -3,6 +3,12 @@ import LoadingSpinner from "../LoadingSpinner";
 import { initMAGE, type MAGEEngineAPI } from "@notrac/mage";
 import "./engine.css";
 
+function fmt(secs: number) {
+  const m = Math.floor(secs / 60);
+  const s = Math.floor(secs % 60);
+  return `${m}:${s.toString().padStart(2, "0")}`;
+}
+
 type EnginePlayerProps = {
   preset?: string | object | null;
   displayControls?: boolean;
@@ -16,6 +22,13 @@ const EnginePlayer = ({ displayControls = false, preset, audioSource, onEngineRe
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const [engine, setEngine] = useState<MAGEEngineAPI | null>(null);
   const [audioLoaded, setAudioLoaded] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [elapsed, setElapsed] = useState(0);
+  const [duration, setDuration] = useState(0);
+
+  const playStartRef = useRef<number | null>(null);
+  const accumulatedRef = useRef(0);
+  const timerRef = useRef<number | null>(null);
 
   useEffect(() => {
     if (!canvasRef.current) return;
@@ -52,7 +65,13 @@ const EnginePlayer = ({ displayControls = false, preset, audioSource, onEngineRe
   useEffect(() => {
     if (!engine || !audioSource) return;
     setAudioLoaded(false);
+    setIsPlaying(false);
+    accumulatedRef.current = 0;
+    setElapsed(0);
     engine.loadAudio(audioSource);
+
+    const audio = new Audio(audioSource);
+    audio.onloadedmetadata = () => setDuration(audio.duration);
 
     const intervalId = window.setInterval(() => {
       if (engine.isAudioLoaded()) {
@@ -68,6 +87,47 @@ const EnginePlayer = ({ displayControls = false, preset, audioSource, onEngineRe
   useEffect(() => {
     if (engine && preset) engine.loadPreset(preset as any);
   }, [preset, engine]);
+
+  useEffect(() => {
+    if (isPlaying) {
+      playStartRef.current = Date.now();
+      timerRef.current = window.setInterval(() => {
+        const sinceStart = (Date.now() - (playStartRef.current ?? Date.now())) / 1000;
+        const next = accumulatedRef.current + sinceStart;
+        if (duration > 0 && next >= duration) {
+          setElapsed(duration);
+          accumulatedRef.current = duration;
+          playStartRef.current = null;
+          setIsPlaying(false);
+        } else {
+          setElapsed(next);
+        }
+      }, 250);
+    } else {
+      if (timerRef.current) window.clearInterval(timerRef.current);
+      if (playStartRef.current !== null) {
+        accumulatedRef.current += (Date.now() - playStartRef.current) / 1000;
+        playStartRef.current = null;
+      }
+    }
+    return () => { if (timerRef.current) window.clearInterval(timerRef.current); };
+  }, [isPlaying, duration]);
+
+  const handlePlay = () => {
+    if (duration > 0 && accumulatedRef.current >= duration - 0.5) {
+      accumulatedRef.current = 0;
+      setElapsed(0);
+    }
+    engine?.play();
+    setIsPlaying(true);
+  };
+
+  const handlePause = () => {
+    engine?.pause();
+    setIsPlaying(false);
+  };
+
+  const progress = duration > 0 ? Math.min(elapsed / duration, 1) : 0;
 
   return (
     <div className="mage-engine">
@@ -89,7 +149,7 @@ const EnginePlayer = ({ displayControls = false, preset, audioSource, onEngineRe
             type="button"
             className="mage-btn mage-btn--icon"
             aria-label="Play"
-            onClick={() => engine?.play()}
+            onClick={handlePlay}
             disabled={!audioLoaded}
           >
             <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
@@ -100,7 +160,7 @@ const EnginePlayer = ({ displayControls = false, preset, audioSource, onEngineRe
             type="button"
             className="mage-btn mage-btn--icon"
             aria-label="Pause"
-            onClick={() => engine?.pause()}
+            onClick={handlePause}
             disabled={!audioLoaded}
           >
             <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
@@ -108,6 +168,12 @@ const EnginePlayer = ({ displayControls = false, preset, audioSource, onEngineRe
               <rect x="14" y="4" width="4" height="16" rx="1" />
             </svg>
           </button>
+          <div className="mage-engine__progress-track">
+            <div className="mage-engine__progress-fill" style={{ width: `${progress * 100}%` }} />
+          </div>
+          <span className="mage-engine__timestamp">
+            {fmt(elapsed)}{duration > 0 ? ` / ${fmt(duration)}` : ""}
+          </span>
           <button
             type="button"
             className="mage-btn--icon-ghost"

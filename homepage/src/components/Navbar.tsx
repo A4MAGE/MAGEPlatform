@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useLocation, useNavigate, Link } from 'react-router-dom';
 import Icon from "../assets/favicon.svg"
 
-const sections = ['home', 'explore', 'engine']
+const sections = ['home', 'explore', 'engine', 'help']
 
 function Navbar() {
   const [active, setActive] = useState('home')

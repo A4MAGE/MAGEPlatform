@@ -12,6 +12,8 @@
   "dependencies": {
     "@fontsource/anta": "^5.2.7",
     "@fontsource/michroma": "^5.2.8",
+    "@notrac/mage": "^1.0.1",
+    "@supabase/supabase-js": "^2.105.1",
     "embla-carousel-react": "^8.6.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
@@ -27,6 +29,7 @@
     "eslint-plugin-react-hooks": "^7.0.1",
     "eslint-plugin-react-refresh": "^0.4.24",
     "globals": "^16.5.0",
+    "terser": "^5.46.2",
     "typescript": "~5.9.3",
     "typescript-eslint": "^8.48.0",
     "vite": "^7.3.1"
