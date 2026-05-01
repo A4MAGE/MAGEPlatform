@@ -54,15 +54,18 @@ const BroadcastViewer = () => {
     console.log("[Viewer] startPlay time=", time);
     shouldPlayRef.current = true;
     targetTimeRef.current = time;
+    const startedAt = Date.now();
     clearRetry();
     retryRef.current = window.setInterval(() => {
       const eng = engineRef.current;
-      const loaded = eng?.isAudioLoaded();
-      if (!eng || !loaded) return;
-      eng.seek(targetTimeRef.current);
+      if (!eng || !eng.isAudioLoaded()) return;
+      // Add time spent waiting for audio to load so we land exactly in sync
+      const loadDelay = (Date.now() - startedAt) / 1000;
+      const seekTo = targetTimeRef.current + loadDelay;
+      eng.seek(seekTo);
       eng.play();
       clearRetry();
-      console.log("[Viewer] ▶ playing at", targetTimeRef.current);
+      console.log("[Viewer] ▶ playing at", seekTo, "(load delay:", loadDelay.toFixed(2), "s)");
     }, 100);
   }, []);
 
