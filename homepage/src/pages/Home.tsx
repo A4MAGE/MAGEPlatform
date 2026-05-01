@@ -10,7 +10,7 @@ const features = [
       </svg>
     ),
     title: "Create your own visuals",
-    body: "Sculpt audio-reactive environments with a live parameter editor. Every knob, shader, and effect responds to your sound in real time — no two performances look the same.",
+    body: "Sculpt audio-reactive environments with a live parameter editor. Every knob, shader, and effect responds to your sound in real time no two performances look the same.",
   },
   {
     icon: (
@@ -19,7 +19,7 @@ const features = [
       </svg>
     ),
     title: "Explore community presets",
-    body: "Browse thousands of presets made by other creators. Find something you love, load it into the engine instantly, and remix it into something your own.",
+    body: "Browse presets made by other creators. Find something you love, load it into the engine instantly, and remix it into something your own.",
   },
   {
     icon: (
@@ -37,7 +37,7 @@ const features = [
       </svg>
     ),
     title: "Share with your audience",
-    body: "Go live yourself and broadcast your visuals to a room full of viewers. Share a link, drop it in your stream, or embed it anywhere — no setup required.",
+    body: "Go live yourself and broadcast your visuals to a room full of viewers. Share a link, and get to creating with viewers.",
   },
 ]
 
