@@ -3,12 +3,24 @@ import { Link } from 'react-router-dom'
 import "../App.css"
 import useEmblaCarousel from 'embla-carousel-react'
 
+function gradientForName(name = "") {
+  let h1 = 0, h2 = 0
+  for (let i = 0; i < name.length; i++) {
+    h1 = (h1 * 31 + name.charCodeAt(i)) & 0xffff
+    h2 = (h2 * 17 + name.charCodeAt(i)) & 0xffff
+  }
+  const hue1 = h1 % 360
+  const hue2 = (hue1 + 60 + (h2 % 60)) % 360
+  return `linear-gradient(135deg, hsl(${hue1},55%,28%), hsl(${hue2},60%,18%))`
+}
+
 interface PresetItem {
   id: number
   name: string
   creator: string
   genre: string
   downloads: string
+  thumbnail?: string
 }
 
 interface CarouselProps {
@@ -53,15 +65,21 @@ function Carousel({ items, accent }: CarouselProps) {
             <div className="embla__slide" key={item.id}>
               <div className="carousel-slide-content" style={getSlideStyle(index)}>
                 <div className="preset-card">
-                  <div className="preset-card__visual" style={{ background: `linear-gradient(135deg, ${accent}18, ${accent}06)`, borderBottom: `1px solid ${accent}30` }} />
+                  <div className="preset-card__visual" style={
+                    item.thumbnail
+                      ? { backgroundImage: `url(${item.thumbnail})`, backgroundSize: 'cover', backgroundPosition: 'center', borderBottom: `1px solid ${accent}30` }
+                      : { background: gradientForName(item.name), borderBottom: `1px solid ${accent}30` }
+                  } />
                   <div className="preset-card__body">
                     <div className="preset-card__top">
                       <span className="preset-card__name">{item.name}</span>
-                      <span className="preset-tag" style={{ color: accent, borderColor: `${accent}60`, background: `${accent}12` }}>{item.genre}</span>
                     </div>
                     <span className="preset-card__creator">by {item.creator}</span>
                     <div className="preset-card__footer">
-                      <span className="preset-downloads">↓ {item.downloads}</span>
+                      <div className="preset-card__footer-left">
+                        <span className="preset-downloads">↓ {item.downloads}</span>
+                        <span className="preset-tag" style={{ color: accent, borderColor: `${accent}60`, background: `${accent}12` }}>{item.genre}</span>
+                      </div>
                       <Link to="/signup" className="try-btn-sm" style={{ color: accent, borderColor: `${accent}60` }}>
                         Try it →
                       </Link>
