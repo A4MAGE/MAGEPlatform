@@ -2,6 +2,7 @@ import { useEffect } from 'react'
 import Home from './pages/Home.tsx'
 import Explore from './pages/Explore.tsx'
 import Engine from './pages/Engine.tsx'
+import Help from './pages/Help.tsx'
 import Navbar from './components/Navbar.tsx'
 import Footer from './components/Footer.tsx'
 import SynthwaveBg from './components/SynthwaveBg.tsx'
@@ -24,6 +25,7 @@ function App() {
       <section id="home"><Home /></section>
       <section id="explore"><Explore /></section>
       <section id="engine"><Engine /></section>
+      <section id="help"><Help /></section>
       <Footer />
     </>
   )
