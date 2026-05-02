@@ -174,12 +174,13 @@ const BroadcastHost = () => {
 
   const handlePause = () => {
     engineRef.current?.pause();
+    // Capture position BEFORE flipping isPlayingRef — getPlaybackTime() uses it
+    const frozenTime = getPlaybackTime();
     setIsPlaying(false);
     isPlayingRef.current = false;
-    // Freeze the offset at current position so resume starts from here
-    playOffsetRef.current = getPlaybackTime();
+    playOffsetRef.current = frozenTime;
     playStartedAtRef.current = null;
-    pushState({ playing: false, playbackTime: playOffsetRef.current });
+    pushState({ playing: false, playbackTime: frozenTime });
   };
 
   const togglePlayPause = () => isPlaying ? handlePause() : handlePlay();
